@@ -6,10 +6,9 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const categories = [
-    { name: "Men", path: "/shop?category=men" },
-    { name: "Women", path: "/shop?category=women" },
-    { name: "Kids", path: "/shop?category=kids" },
-    { name: "Accessories", path: "/shop?category=accessories" },
+    { name: "Men", path: "/shop/men" },
+    { name: "Women", path: "/shop/women" },
+    { name: "Home & Living", path: "/shop/home-living" },
   ];
 
   return (
@@ -41,6 +40,7 @@ const Navbar = () => {
               ))}
             </div>
           </div>
+          <Link to="/about" className="hover:text-white py-2">About Us</Link>
           <Link to="/contact" className="hover:text-white py-2">Contact</Link>
           <Link to="/team" className="hover:text-white py-2">Team</Link>
         </div>
@@ -93,6 +93,7 @@ const Navbar = () => {
                    ))}
                  </div>
                </div>
+               <Link to="/about" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>About Us</Link>
                <Link to="/contact" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>Contact</Link>
                <Link to="/team" className="hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>Team</Link>
                <Link to="/login" className="text-white hover:text-gray-200 mt-4" onClick={() => setIsMobileMenuOpen(false)}>Login / Register</Link>

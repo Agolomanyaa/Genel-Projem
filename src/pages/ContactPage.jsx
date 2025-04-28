@@ -2,75 +2,121 @@ import React from 'react';
 import MainLayout from '../layouts/MainLayout';
 
 const ContactPage = () => {
+
+  // Örnek form gönderme fonksiyonu (şimdilik sadece konsola yazdırıyor)
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
+    console.log("Form submitted:", data);
+    // Burada form gönderme API çağrısı veya başka bir işlem yapılabilir.
+    alert("Mesajınız gönderildi! (Bu sadece bir demo)");
+    event.target.reset(); // Formu temizle
+  };
+
   return (
     <MainLayout>
-      {/* 1. Sayfa Başlığı ve Breadcrumb */}
-      <section className="bg-lighter-bg py-6">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-          <h1 className="text-2xl font-bold text-dark-text mb-2 md:mb-0">Contact Us</h1>
-          <div className="text-sm font-bold">
-            <a href="/" className="text-dark-text hover:text-primary">Home</a>
-            <span className="text-muted-text mx-2">{'>'}</span>
-            <span className="text-second-text">Contact</span>
+      <section className="bg-white pt-20 pb-12 md:pt-28 md:pb-20">
+        <div className="container mx-auto px-6">
+          {/* Sayfa Başlığı */}
+          <div className="text-center mb-10 md:mb-16">
+            <h1 className="text-3xl md:text-4xl font-bold text-dark-text mb-3">Contact Us</h1>
+            <p className="text-second-text text-base md:text-lg">
+              Get in touch with us for any inquiries or support.
+            </p>
+             {/* Başlık Altı Çizgi (Tema Renginde) */}
+             <div className="w-20 h-1 bg-primary mx-auto mt-4 rounded"></div>
           </div>
-        </div>
-      </section>
 
-      {/* 2. İletişim Bilgileri ve Harita */}
-      <section className="container mx-auto px-6 py-12 md:py-16 text-center">
-        <div className="max-w-2xl mx-auto mb-10">
-            <h2 className="text-sm font-bold text-dark-text">Visit Our Office</h2>
-            <h3 className="text-4xl font-bold text-dark-text my-3">We help small businesses with big ideas</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* İletişim Kartları */}
-          <div className="flex flex-col items-center p-8 shadow-md rounded bg-white">
-             📞
-             <p className="text-dark-text font-bold text-sm mb-2">support@example.com</p>
-             <p className="text-dark-text font-bold text-sm mb-4">georgia.young@example.com</p>
-             <p className="text-dark-text font-bold text-base mb-2">Get Support</p>
-             <button className="border border-primary text-primary font-bold text-sm py-3 px-6 rounded-full hover:bg-primary hover:text-white transition">
-               Submit Request
-             </button>
-          </div>
-          <div className="flex flex-col items-center p-8 shadow-md rounded bg-dark-bg text-white"> {/* Orta Kart Farklı Renk */}
-             📍
-             <p className="font-bold text-sm mb-2">support@example.com</p>
-             <p className="font-bold text-sm mb-4">georgia.young@example.com</p>
-             <p className="font-bold text-base mb-2">Get Support</p>
-             <button className="border border-primary text-primary font-bold text-sm py-3 px-6 rounded-full hover:bg-primary hover:text-white transition">
-               Submit Request
-             </button>
-          </div>
-          <div className="flex flex-col items-center p-8 shadow-md rounded bg-white">
-             ✉️
-             <p className="text-dark-text font-bold text-sm mb-2">support@example.com</p>
-             <p className="text-dark-text font-bold text-sm mb-4">georgia.young@example.com</p>
-             <p className="text-dark-text font-bold text-base mb-2">Get Support</p>
-             <button className="border border-primary text-primary font-bold text-sm py-3 px-6 rounded-full hover:bg-primary hover:text-white transition">
-               Submit Request
-             </button>
-          </div>
-        </div>
-      </section>
+          {/* Harita ve Form Alanı */}
+          <div className="flex flex-col lg:flex-row gap-10 md:gap-16 items-start">
 
-      {/* 3. İletişim Formu */}
-      <section className="container mx-auto px-6 pb-12 md:pb-16">
-         <div className="max-w-2xl mx-auto text-center">
-            <h4 className="text-sm font-bold text-dark-text mb-3">WE Can't WAIT TO MEET YOU</h4>
-            <h2 className="text-5xl font-bold text-dark-text mb-8">Let's Talk</h2>
-            <form className="flex flex-col gap-6">
-                <input type="text" placeholder="Your Name *" className="p-4 border rounded border-gray-300 bg-lighter-bg" required />
-                <input type="email" placeholder="Your Email *" className="p-4 border rounded border-gray-300 bg-lighter-bg" required />
-                <input type="text" placeholder="Subject *" className="p-4 border rounded border-gray-300 bg-lighter-bg" required />
-                <textarea placeholder="Your Message *" rows="5" className="p-4 border rounded border-gray-300 bg-lighter-bg" required></textarea>
-                <button type="submit" className="bg-primary text-white font-bold py-4 px-8 rounded hover:bg-sky-600 transition self-center">
-                    Send Message
+            {/* Google Harita (Sol Taraf - GÜNCELLENDİ) */}
+            <div className="w-full lg:w-1/2 h-80 md:h-96 lg:h-[500px] rounded-lg overflow-hidden shadow-md">
+              {/* Kullanıcıdan alınan iframe kodu */}
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10370.544089738982!2d28.360624535717747!3d37.194760406255014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14bf723ff569564f%3A0x12ac1e89bc54f012!2sR%C3%BCya%20Park%20AVM!5e0!3m2!1str!2str!4v1745778436243!5m2!1str!2str" // Bu satır güncellendi
+                width="100%" // Genişlik ve yükseklik %100 olarak ayarlandı
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Our Location - Rüya Park AVM" // Başlık güncellendi
+              ></iframe>
+            </div>
+
+            {/* İletişim Formu (Sağ Taraf) */}
+            <div className="w-full lg:w-1/2">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Ad Soyad */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                    {/* İkon Placeholder */} 👤
+                  </span>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Your Name"
+                    required
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                  />
+                </div>
+
+                {/* E-Posta */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                    {/* İkon Placeholder */} ✉️
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Your Email"
+                    required
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                  />
+                </div>
+
+                {/* Konu */}
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                    {/* İkon Placeholder */} 🏷️
+                  </span>
+                  <input
+                    type="text"
+                    name="subject"
+                    placeholder="Subject"
+                    required
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                  />
+                </div>
+
+                {/* Mesaj */}
+                <div className="relative">
+                   <span className="absolute top-4 left-0 pl-3 flex items-center text-gray-400">
+                     {/* İkon Placeholder */} 💬
+                   </span>
+                  <textarea
+                    name="message"
+                    placeholder="Your Message"
+                    required
+                    rows="5"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition duration-150 ease-in-out resize-none" // resize-none ile yeniden boyutlandırmayı engelle
+                  ></textarea>
+                </div>
+
+                {/* Gönderme Butonu */}
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-white font-bold py-3 px-6 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out"
+                >
+                  Send Message
                 </button>
-            </form>
-         </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </section>
-
     </MainLayout>
   );
 };

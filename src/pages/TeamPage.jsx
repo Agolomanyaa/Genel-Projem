@@ -6,26 +6,24 @@ import tandoganImage from '../assets/tandogangoncu.png';
 // Tek bir ekip üyesi kartı için bileşen
 const TeamMemberCard = ({ name, title, imageUrl }) => {
   return (
-    <div className="text-center shadow-lg rounded-lg overflow-hidden bg-white">
+    <div className="text-center shadow-lg rounded-lg overflow-hidden bg-white pb-6 group transition-all duration-300 ease-in-out hover:shadow-xl">
       {/* Resim Alanı - aspect-ratio ile orantılı tutalım */}
-      <div className="aspect-[4/5] bg-gray-200">
+      <div className="aspect-square overflow-hidden mb-5">
         <img
-          src={imageUrl || "https://via.placeholder.com/400x500/eee/aaa?text=Profile+Pic"}
-          alt={`Profile picture of ${name}`}
-          className="w-full h-full object-cover object-center"
+          src={imageUrl || "https://via.placeholder.com/400x400/e0e0e0/a0a0a0?text=Member"}
+          alt={name}
+          className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
           loading="lazy"
         />
       </div>
       {/* Bilgi Alanı */}
-      <div className="p-6">
-        <h5 className="font-bold text-base text-dark-text mb-1">{name}</h5>
-        <p className="text-sm text-second-text font-bold mb-4">{title}</p>
-        {/* Sosyal Medya İkonları (Placeholder) */}
-        <div className="flex justify-center gap-4 text-primary">
-           <a href="#" aria-label={`${name} Facebook`} className="hover:text-sky-700">👍</a>
-           <a href="#" aria-label={`${name} Instagram`} className="hover:text-sky-700">📷</a>
-           <a href="#" aria-label={`${name} Twitter`} className="hover:text-sky-700">🐦</a>
-        </div>
+      <h5 className="text-base font-bold text-dark-text mb-1">{name}</h5>
+      <p className="text-sm text-second-text mb-4">{title}</p>
+      {/* Sosyal Medya İkonları (Placeholder) */}
+      <div className="flex justify-center gap-4 text-primary">
+        <a href="#" aria-label={`${name} Facebook`} className="hover:text-sky-600"><svg width="24" height="24" /*...*/ >{/* icon */}</svg></a>
+        <a href="#" aria-label={`${name} Instagram`} className="hover:text-pink-500"><svg width="24" height="24" /*...*/ >{/* icon */}</svg></a>
+        <a href="#" aria-label={`${name} Twitter`} className="hover:text-sky-400"><svg width="24" height="24" /*...*/ >{/* icon */}</svg></a>
       </div>
     </div>
   );
@@ -59,8 +57,7 @@ const TeamPage = () => {
         <h4 className="text-base font-bold text-second-text mb-3">WHAT WE DO</h4>
         <h1 className="text-4xl md:text-5xl font-bold text-dark-text mb-4">Meet Our Team</h1>
         <p className="text-sm text-second-text max-w-xl mx-auto">
-          Problems trying to resolve the conflict between the two major realms
-          of Classical physics: Newtonian mechanics{" "}
+          Success is More Long-Lasting and Resilient with Teamwork: Teamwork is the foundation of sustainable success.
         </p>
       </section>
 

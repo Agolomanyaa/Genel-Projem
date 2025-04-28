@@ -1,30 +1,25 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import ShopPage from './pages/ShopPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ContactPage from './pages/ContactPage';
 import TeamPage from './pages/TeamPage';
+import ShopPage from './pages/ShopPage';
+import AboutUsPage from './pages/AboutUsPage';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Switch>
-        <Route exact path="/">
-          <HomePage />
-        </Route>
-        <Route path="/shop">
-          <ShopPage />
-        </Route>
-        <Route path="/product/:productId">
-          <ProductDetailPage />
-        </Route>
-        <Route path="/contact">
-          <ContactPage />
-        </Route>
-        <Route path="/team">
-          <TeamPage />
-        </Route>
+        <Route path="/" exact component={HomePage} />
+        <Route path="/product/:productId" component={ProductDetailPage} />
+        <Route path="/contact" component={ContactPage} />
+        <Route path="/team" component={TeamPage} />
+        <Route path="/shop/:categoryName" component={ShopPage} />
+        <Route path="/shop" exact component={ShopPage} />
+        <Route path="/about" component={AboutUsPage} />
       </Switch>
     </Router>
   );
