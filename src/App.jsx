@@ -7,6 +7,7 @@ import TeamPage from './pages/TeamPage';
 import ShopPage from './pages/ShopPage';
 import AboutUsPage from './pages/AboutUsPage';
 import SignupPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
 import ScrollToTop from './components/ScrollToTop';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/team" component={TeamPage} />
         <Route path="/about" component={AboutUsPage} />
         <Route path="/signup" component={SignupPage} />
+        <Route path="/login" component={LoginPage} />
         <Route path="/shop/:categoryName" component={ShopPage} />
         <Route path="/shop" exact component={ShopPage} />
       </Switch>
