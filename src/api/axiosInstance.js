@@ -10,4 +10,27 @@ const axiosInstance = axios.create({
   }
 });
 
+// --- Axios Request Interceptor - GÜNCELLENDİ ---
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Önce localStorage'dan token'ı al
+    let token = localStorage.getItem('token');
+
+    // localStorage'da yoksa sessionStorage'dan al
+    if (!token) {
+      token = sessionStorage.getItem('token');
+    }
+
+    // Eğer token varsa ve config.headers varsa
+    if (token && config.headers) {
+      // Authorization başlığını ayarla
+      config.headers['Authorization'] = token;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export default axiosInstance; 

@@ -1,4 +1,5 @@
 import axiosInstance from '../../api/axiosInstance'; // axiosInstance'ı import et
+import { toast } from 'react-toastify'; // Toastify kullanıyorsanız
 
 // Action Tipleri
 export const SET_USER = 'SET_USER';
@@ -65,47 +66,106 @@ export const fetchRoles = () => async (dispatch) => {
   }
 };
 
-// --- Thunk Action Creator (Login İçin) - YENİ EKLENDİ ---
+// --- Thunk Action Creator (Login İçin) - GÜNCELLENDİ ---
 export const loginUser = (credentials, rememberMe, history) => async (dispatch) => {
-  // dispatch(loginUserStart()); // Yükleme başladı action'ı (opsiyonel)
   try {
-    // 1. API'ye login isteği gönder
-    const response = await axiosInstance.post('/login', credentials); // credentials = { email, password }
+    console.log("Attempting login with:", credentials, "Remember Me:", rememberMe);
+    const response = await axiosInstance.post('/login', credentials);
 
-    // 2. Başarılı cevap geldi, verileri al
-    const { token, name, email, role_id } = response.data;
-    const userData = { name, email, role_id }; // Redux'a kaydedilecek kullanıcı verisi
+    if (response.status === 200 && response.data.token) {
+      const { token, ...userData } = response.data;
+      console.log("Login successful. Token:", token, "User Data:", userData);
 
-    // 3. Kullanıcı bilgilerini Redux store'una kaydet
-    dispatch(setUser(userData)); // VEYA dispatch(loginUserSuccess(userData));
-    // dispatch(loginUserSuccess(userData)); // Opsiyonel success action'ı
+      // 1. Kullanıcı bilgilerini Redux state'ine kaydet
+      dispatch(setUser(userData));
 
-    // 4. "Remember Me" işaretliyse token'ı localStorage'a kaydet
-    if (rememberMe) {
-      localStorage.setItem('token', token);
-      // İsteğe bağlı: localStorage.setItem('user', JSON.stringify(userData));
-    }
+      // 2. Token'ı rememberMe durumuna göre kaydet
+      if (rememberMe) {
+        localStorage.setItem('token', token);
+        sessionStorage.removeItem('token'); // Diğerini temizle
+        console.log("Token saved to localStorage.");
+      } else {
+        sessionStorage.setItem('token', token);
+        localStorage.removeItem('token'); // Diğerini temizle
+        console.log("Token saved to sessionStorage.");
+      }
 
-    // 5. Kullanıcıyı önceki sayfaya veya ana sayfaya yönlendir
-    // history objesi varsa ve önceki sayfa bilgisi varsa oraya git, yoksa ana sayfaya
-    if (history.length > 1 && history.location.key) { // Basit bir kontrol
-       history.goBack();
+      // 3. Başarılı giriş sonrası yönlendirme
+      history.push('/');
+      toast.success("Login Successful!"); // İsteğe bağlı
+
+      return null; // Hata yok
     } else {
-       history.push('/'); // Ana sayfaya yönlendir
+      console.error("Login failed: Unexpected response format.", response);
+      toast.error("Login failed. Please try again.");
+      return "Login failed. Unexpected response.";
     }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
+    console.error("Login error:", errorMessage, error.response);
+    toast.error(errorMessage); // İsteğe bağlı
+    return errorMessage;
+  }
+};
 
-    // 6. Başarı durumunu belirtmek için belki null döndür (veya başarı objesi)
-    return null; // Veya return { success: true };
+// --- Thunk Action Creator (Token Doğrulama İçin) - GÜNCELLENDİ ---
+export const verifyToken = () => async (dispatch) => {
+  // 1. Önce localStorage'dan token'ı al
+  let token = localStorage.getItem('token');
+  let tokenSource = 'localStorage';
+
+  // 2. localStorage'da yoksa sessionStorage'ı kontrol et
+  if (!token) {
+    token = sessionStorage.getItem('token');
+    tokenSource = 'sessionStorage';
+  }
+
+  // 3. Hiçbir yerde token yoksa işlemi bitir
+  if (!token) {
+    // console.log("No token found in localStorage or sessionStorage."); // Konsolu kirletmemek için yorumlanabilir
+    return;
+  }
+
+  console.log(`Token found in ${tokenSource}, attempting verification...`);
+
+  try {
+    // 4. Token varsa, Axios instance interceptor'ı başlığı otomatik ekleyecek.
+    //    Doğrudan /verify endpoint'ine GET isteği gönder.
+    const response = await axiosInstance.get('/verify');
+
+    // 5. Başarılı cevap (200 OK) geldiyse, kullanıcı bilgilerini al ve state'i güncelle.
+    if (response.status === 200) {
+      const userData = response.data;
+      console.log("Token verified successfully. User data:", userData);
+      dispatch(setUser(userData));
+
+      // Opsiyonel: Yeni token gelirse, doğru storage'ı güncelle
+      // if (response.data.newToken) {
+      //   if (tokenSource === 'localStorage') {
+      //     localStorage.setItem('token', response.data.newToken);
+      //   } else {
+      //     sessionStorage.setItem('token', response.data.newToken);
+      //   }
+      // }
+
+    } else {
+      // Bu genellikle try/catch'e düşer ama yine de kontrol edelim.
+      console.warn("Token verification returned unexpected status:", response.status);
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
+      dispatch(setUser(null));
+    }
 
   } catch (error) {
-    // 7. Hata oluştu
-    console.error("Login failed:", error.response?.data || error.message);
-    const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
-    // dispatch(loginUserFailure(errorMessage)); // Opsiyonel failure action'ı
+    // 6. Hata oluştuysa (genellikle 401 Unauthorized), token geçersizdir.
+    console.error("Token verification failed:", error.response?.data?.message || error.message);
 
-    // 8. Hata mesajını bileşene iletmek için hatayı fırlat veya döndür
-    // throw new Error(errorMessage); // VEYA hata mesajını döndür
-    return errorMessage;
+    // Token'ı her iki yerden de sil
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+
+    // Kullanıcı bilgilerini Redux state'inden sil
+    dispatch(setUser(null));
   }
 };
 

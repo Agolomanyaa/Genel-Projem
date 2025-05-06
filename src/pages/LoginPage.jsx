@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MainLayout from '../layouts/MainLayout';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../store/actions/clientActions';
@@ -14,6 +14,9 @@ const LoginPage = () => {
   });
   const history = useHistory();
   const dispatch = useDispatch();
+  const location = useLocation();
+
+  const { from } = location.state || { from: { pathname: "/" } };
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -27,7 +30,9 @@ const LoginPage = () => {
 
     const errorResult = await dispatch(loginUser(credentials, rememberMe, history));
 
-    if (errorResult) {
+    if (!errorResult) {
+      history.replace(from);
+    } else {
       setSubmitError(errorResult);
     }
     setIsSubmitting(false);
