@@ -4,7 +4,9 @@ export const getProductsData = () => [
     {
         productId: 'product-1',
         title: "Men's Oversize Jean Shirt Black",
-        category: 'Men',
+        category: 'Men', // Orijinal kategori bilgisi korunabilir
+        gender: 'e', // API uyumu için eklendi
+        apiCategoryId: 11, // Erkek Gömlek
         price: '16.48',
         oldPrice: '20.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/38c0ceaa-0b03-415c-8b7f-faae530b52a5/image_3840.webp',
@@ -32,6 +34,8 @@ export const getProductsData = () => [
         productId: 'product-2',
         title: "Men's Oversize Jean Shirt Khaki",
         category: 'Men',
+        gender: 'e',
+        apiCategoryId: 11, // Erkek Gömlek
         price: '16.48',
         oldPrice: '20.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ff728341-c3bc-4ee4-b28d-863833d5537e/3840/b21-25021-eh-4.webp',
@@ -59,6 +63,8 @@ export const getProductsData = () => [
       productId: 'product-3',
       title: "Men's Denim Overalls",
       category: 'Men',
+      gender: 'e',
+      apiCategoryId: 13, // Erkek Pantalon (Tulum için en yakın tahmin)
       price: '25.76',
       oldPrice: '40.00',
       imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ad1e21f5-bf70-49ff-8295-ae9b43302f29/3840/2699-2.webp',
@@ -87,6 +93,8 @@ export const getProductsData = () => [
       productId: 'product-4',
       title: "Men's Straight Leg Jean Pants Blue",
       category: 'Men',
+      gender: 'e',
+      apiCategoryId: 13, // Erkek Pantalon
       price: '29.42',
       oldPrice: '30.00',
       imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/00bc99ff-ed27-40c7-b640-974552da427f/image_3840.webp',
@@ -115,6 +123,8 @@ export const getProductsData = () => [
       productId: 'product-5',
       title: "Men's Skater Fit Jean Pants Ice Blue",
       category: 'Men',
+      gender: 'e',
+      apiCategoryId: 13, // Erkek Pantalon
       price: '29.42',
       oldPrice: '30.00',
       imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/eb77f57a-3e12-47d7-9f4d-eb4fb4b3a6d4/3840/bnny-24003-e-buz-mavi-3.webp',
@@ -148,6 +158,8 @@ export const getProductsData = () => [
       productId: 'product-6',
       title: "Men's Polo Neck Tree Pattern 100% Cotton T-Shirt",
       category: 'Men',
+      gender: 'e',
+      apiCategoryId: 14, // Erkek Tişört
       price: '9.24',
       oldPrice: '15.00',
       imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/44651322-5d3c-4fab-a314-cb0315f57607/900/e24002-yesil-3.webp',
@@ -183,6 +195,8 @@ export const getProductsData = () => [
         productId: 'product-7',
         title: "Men's Crew Neck Basic T-Shirt Black",
         category: 'Men',
+        gender: 'e',
+        apiCategoryId: 14, // Erkek Tişört
         price: '9.24',
         oldPrice: '15.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/b8139956-1f9c-41c6-94c1-7262be45475c/900/1609-nvy-2.webp',
@@ -214,6 +228,8 @@ export const getProductsData = () => [
         productId: 'product-8',
         title: "Men's Stretch Denim Jacket Blue",
         category: 'Men',
+        gender: 'e',
+        apiCategoryId: 10, // Erkek Ceket
         price: '17.96',
         oldPrice: '22.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/79fd3697-bc65-4441-8d48-afbb8916f51e/3840/22p012-mavi-4.webp',
@@ -240,11 +256,13 @@ export const getProductsData = () => [
         ],
         sizeChartUrl: "https://cdn.sportdirect.com/files/website-images/Stanno/Stanno-Size-chart-2024-2.webp"
     },
-    // 9. Ürün (Fiyat Güncellendi)
+    // 9. Ürün
     {
         productId: 'product-9',
         title: "Men's Regular Fit Jean Pants Black",
         category: 'Men',
+        gender: 'e',
+        apiCategoryId: 13, // Erkek Pantalon
         price: '29.42',
         oldPrice: '30.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/14ebe403-d208-4b42-8e63-083b37c27b09/3840/22038-rins-1.webp',
@@ -276,11 +294,13 @@ export const getProductsData = () => [
         ],
         sizeChartUrl: "https://cdn.sportdirect.com/files/website-images/Stanno/Stanno-Size-chart-2024-2.webp"
     },
-    // 10. Ürün (Son erkek ürünü)
+    // 10. Ürün
     {
         productId: 'product-10',
         title: "Men's Stretch Straight Jean Pants",
         category: 'Men',
+        gender: 'e',
+        apiCategoryId: 13, // Erkek Pantalon
         price: '29.42',
         oldPrice: '30.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/84a22b3c-e5e6-4954-bea7-c7b190b396a7/3840/bw-f10063.webp',
@@ -308,11 +328,13 @@ export const getProductsData = () => [
         ],
         sizeChartUrl: "https://cdn.sportdirect.com/files/website-images/Stanno/Stanno-Size-chart-2024-2.webp"
     },
-    // 11. Ürün (İlk Kadın Ürünü)
+    // 11. Ürün
     {
         productId: 'product-11',
         title: "Women's Oversize Jean Shirt Black",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 6, // Kadın Gömlek
         price: '17.18',
         oldPrice: '21.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/40301e6e-96b6-418a-b919-da99f34c1628/900/692a7390.webp',
@@ -347,6 +369,8 @@ export const getProductsData = () => [
         productId: 'product-12',
         title: "Women's Oversize Jean Shirt Khaki",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 6, // Kadın Gömlek
         price: '17.18',
         oldPrice: '21.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/656081b6-7d44-406a-a55c-4f7eade0cda5/3840/692a7468.webp',
@@ -381,6 +405,8 @@ export const getProductsData = () => [
         productId: 'product-13',
         title: "Women's Jean Jacket with Pocket Detail",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 3, // Kadın Ceket
         price: '18.46',
         oldPrice: '23.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/7caa07c8-c226-407a-8a50-f5a603416f82/image_3840.webp',
@@ -419,6 +445,8 @@ export const getProductsData = () => [
         productId: 'product-14',
         title: "Women's High Waist Wide Leg Jean Pants",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 8, // Kadın Pantalon
         price: '29.42',
         oldPrice: '30.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/b28dad06-4b5d-4762-9db7-4339b317811f/3840/bw-23001-13.webp',
@@ -452,6 +480,8 @@ export const getProductsData = () => [
         productId: 'product-15',
         title: "Women's Cargo Pocket Jean Pants Blue",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 8, // Kadın Pantalon
         price: '29.42',
         oldPrice: '30.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/b8c1535e-4a24-4079-901e-114d45809472/3840/23w046-5.webp',
@@ -490,6 +520,8 @@ export const getProductsData = () => [
         productId: 'product-16',
         title: "Women's Batwing Sleeve Jean Jumpsuit Rins",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 4, // Kadın Elbise (Tulum için en yakın tahmin)
         price: '25.76',
         oldPrice: '40.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/4eaedf98-263e-4dfc-b4f9-28e60f566930/3840/bnny-w20-533-16.webp',
@@ -523,6 +555,8 @@ export const getProductsData = () => [
         productId: 'product-17',
         title: "Women's Oversize Jean Jumpsuit Blue",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 4, // Kadın Elbise (Tulum için en yakın tahmin)
         price: '37.42',
         oldPrice: '45.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/5b80060e-1133-4f6c-8e3a-ecce48a4e5a3/3840/a8002-620.webp',
@@ -548,6 +582,8 @@ export const getProductsData = () => [
         productId: 'product-18',
         title: "Women's Ethnic Pattern Belted Soft Texture Jean Jumpsuit Blue",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 4, // Kadın Elbise (Tulum için en yakın tahmin)
         price: '25.76',
         oldPrice: '40.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/bc365e31-1aa8-414f-bcc6-ae7e5cb35598/image_3840.webp',
@@ -573,6 +609,8 @@ export const getProductsData = () => [
         productId: 'product-19',
         title: "Women's Trimmed Oversize Jean Jacket Light Blue",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 3, // Kadın Ceket
         price: '16.48',
         oldPrice: '20.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/b0182123-ec87-44a0-ab94-4e22eedcd32b/image_3840.webp',
@@ -598,6 +636,8 @@ export const getProductsData = () => [
         productId: 'product-20',
         title: "Women's High Waist Skater Fit Jean Pants Ice Blue",
         category: 'Women',
+        gender: 'k',
+        apiCategoryId: 8, // Kadın Pantalon
         price: '29.42',
         oldPrice: '30.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/fd20c9c3-121c-45e0-bde3-791cf94e2a09/3840/bnny-24003-k-11.webp',
@@ -618,26 +658,29 @@ export const getProductsData = () => [
         detailedDescription: ["Fabric: 98% Cotton, 2% Elastane (Assumed).", "Fit: Skater Fit.", "High waist design."],
         sizeChartUrl: "https://cdn.sportdirect.com/files/website-images/Stanno/Stanno-Size-chart-2024-3.webp"
     },
-    // 21. Ürün
+    // 21. Ürün - Home & Living Başlangıcı
     {
         productId: 'product-21',
         title: "Cotton Box Double Satin Duvet Cover Set Luster Beige",
-        category: 'Home & Living', price: '57.72', oldPrice: '65.00',
+        category: 'Home & Living',
+        apiCategoryId: null, // API'de Home & Living kategorisi yok
+        price: '57.72', oldPrice: '65.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/6be81ffa-c38c-4a56-abd5-9c4de25673a5/image_3840.webp',
         brand: 'Cotton Box', productCode: 'CB-SATIN-LUSBE', rating: 4.9, availability: 'In Stock',
-        description: 'Double size 100% cotton satin duvet cover set.', colors: ['#F5F5DC'], sizes: ['Double'], // Beige
+        description: 'Double size 100% cotton satin duvet cover set.', colors: ['#F5F5DC'], sizes: ['Double'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/6be81ffa-c38c-4a56-abd5-9c4de25673a5/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/3c209b1e-3e33-489e-9e8f-4fd3c36f426b/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/f97478f7-62f0-437a-943c-750ffa63817a/image_3840.webp'],
         detailPrice: '57.72', detailOldPrice: '65.00',
         detailedDescription: ["Duvet Cover: 200x220 cm", "Sheet: 240x260 cm", "4 Pillowcases: 50x70 cm", "Product Features:", "83 Thread Count", "Material: 100% Cotton Satin", "Washing and Care Recommendations:", "Wash at 30 degrees warm water, inside out.", "Do not use bleach.", "Wash at low heat."]
     },
+    // ... Diğer Home & Living ürünleri için de apiCategoryId: null ve gender alanı olmayacak ...
     // 22. Ürün
     {
         productId: 'product-22',
         title: "Cotton Box Modern Double Duvet Cover Set Giorno Grey",
-        category: 'Home & Living', price: '57.72', oldPrice: '65.00',
+        category: 'Home & Living', apiCategoryId: null, price: '57.72', oldPrice: '65.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/3a1ac4b4-3a15-456d-b93f-8fa43e46c6f6/image_3840.webp',
         brand: 'Cotton Box', productCode: 'CB-MOD-GIOGRY', rating: 4.8, availability: 'In Stock',
-        description: 'Modern double size 100% cotton duvet cover set.', colors: ['#808080'], sizes: ['Double'], // Grey
+        description: 'Modern double size 100% cotton duvet cover set.', colors: ['#808080'], sizes: ['Double'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/3a1ac4b4-3a15-456d-b93f-8fa43e46c6f6/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ccbf42e2-7044-457d-8373-5d81b54340a2/image_3840.webp'],
         detailPrice: '57.72', detailOldPrice: '65.00',
         detailedDescription: ["Product Dimensions:", "Duvet Cover: 200x220 cm", "Sheet: 240x260 cm", "2 Pillowcases: 50x70 cm", "Product Features:", "Fabric: 30/1 57 Thread Ranforce 100% Cotton, Reactive Print & Solid Dye", "Washing and Care Recommendations:", "Wash at 30 degrees warm water, inside out.", "Do not use bleach.", "Wash at low heat."]
@@ -646,10 +689,10 @@ export const getProductsData = () => [
     {
         productId: 'product-23',
         title: "Cotton Box Petite Double Duvet Cover Set June Mint",
-        category: 'Home & Living', price: '57.72', oldPrice: '65.00',
+        category: 'Home & Living', apiCategoryId: null, price: '57.72', oldPrice: '65.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/397483d6-e061-412f-8c81-39b436d8410c/image_3840.webp',
         brand: 'Cotton Box', productCode: 'CB-PET-JUNMIN', rating: 4.7, availability: 'In Stock',
-        description: 'Petite double size 100% cotton duvet cover set.', colors: ['#98FB98'], sizes: ['Double'], // PaleGreen (Mint)
+        description: 'Petite double size 100% cotton duvet cover set.', colors: ['#98FB98'], sizes: ['Double'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/397483d6-e061-412f-8c81-39b436d8410c/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/df4741d1-5f88-4c70-a62f-28d01706585a/image_3840.webp'],
         detailPrice: '57.72', detailOldPrice: '65.00',
         detailedDescription: ["Product Dimensions:", "Duvet Cover: 200x220 cm", "Sheet: 240x260 cm", "2 Pillowcases: 50x70 cm", "Product Features:", "Fabric: 30/1 57 Thread", "Material: 100% Cotton Pigment Print", "Washing and Care Recommendations:", "Wash at 30 degrees warm water, inside out.", "Do not use bleach.", "Wash at low heat."]
@@ -658,10 +701,10 @@ export const getProductsData = () => [
     {
         productId: 'product-24',
         title: "Cotton Box Double Satin Duvet Cover Set Owen Beige",
-        category: 'Home & Living', price: '57.72', oldPrice: '65.00',
+        category: 'Home & Living', apiCategoryId: null, price: '57.72', oldPrice: '65.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d77a0060-9293-4e04-b158-6f98e70cbaa0/image_3840.webp',
         brand: 'Cotton Box', productCode: 'CB-SATIN-OWEBEI', rating: 4.9, availability: 'In Stock',
-        description: 'Double size 100% cotton satin duvet cover set.', colors: ['#F5F5DC'], sizes: ['Double'], // Beige
+        description: 'Double size 100% cotton satin duvet cover set.', colors: ['#F5F5DC'], sizes: ['Double'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d77a0060-9293-4e04-b158-6f98e70cbaa0/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/854d97dc-ff5d-4e10-abf6-51c4c1844904/image_3840.webp'],
         detailPrice: '57.72', detailOldPrice: '65.00',
         detailedDescription: ["Duvet Cover: 200x220 cm", "Sheet: 240x260 cm", "4 Pillowcases: 50x70 cm", "Product Features:", "83 Thread Count", "Material: 100% Cotton Satin", "Washing and Care Recommendations:", "Wash at 30 degrees warm water, inside out.", "Do not use bleach.", "Wash at low heat."]
@@ -670,10 +713,10 @@ export const getProductsData = () => [
     {
         productId: 'product-25',
         title: "Cotton Box Minimal Double Duvet Cover Set Stew Blue",
-        category: 'Home & Living', price: '57.72', oldPrice: '65.00',
+        category: 'Home & Living', apiCategoryId: null, price: '57.72', oldPrice: '65.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/01292b52-60e0-4771-8381-05cad6f96fa6/image_3840.webp',
         brand: 'Cotton Box', productCode: 'CB-MIN-STEBLU', rating: 4.6, availability: 'In Stock',
-        description: 'Minimal double size 100% cotton Ranforce duvet cover set.', colors: ['#4682B4'], sizes: ['Double'], // Steel Blue
+        description: 'Minimal double size 100% cotton Ranforce duvet cover set.', colors: ['#4682B4'], sizes: ['Double'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/01292b52-60e0-4771-8381-05cad6f96fa6/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/6323eace-33bc-4ddd-84a2-7e0078f9c8ae/image_3840.webp'],
         detailPrice: '57.72', detailOldPrice: '65.00',
         detailedDescription: ["Product Dimensions:", "Duvet Cover: 200x220 cm", "Sheet: 240x260 cm", "2 Pillowcases: 50x70 cm", "Product Features:", "Fabric: 30/1 57 Thread Ranforce 100% Cotton", "Washing and Care Recommendations:", "Wash at 30 degrees warm water, inside out.", "Do not use bleach.", "Wash at low heat."]
@@ -682,10 +725,10 @@ export const getProductsData = () => [
     {
         productId: 'product-26',
         title: "Cotton Box Palace Satin Double Duvet Cover Set Togay Anthracite",
-        category: 'Home & Living', price: '64.72', oldPrice: '72.00',
+        category: 'Home & Living', apiCategoryId: null, price: '64.72', oldPrice: '72.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ce3fc248-e887-4b31-8e92-9bd39200d70f/image_3840.webp',
         brand: 'Cotton Box', productCode: 'CB-PALSAT-TOGANT', rating: 5.0, availability: 'In Stock',
-        description: 'Palace double size 100% cotton satin duvet cover set.', colors: ['#2F4F4F'], sizes: ['Double'], // DarkSlateGray (Anthracite)
+        description: 'Palace double size 100% cotton satin duvet cover set.', colors: ['#2F4F4F'], sizes: ['Double'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ce3fc248-e887-4b31-8e92-9bd39200d70f/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/8cda2c30-27e6-430c-ab77-775ee69c245c/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/54ae2bc2-445b-4601-a534-1743ac91b96b/image_3840.webp'],
         detailPrice: '64.72', detailOldPrice: '72.00',
         detailedDescription: ["Duvet Cover: 200x220 cm", "Sheet: 240x260 cm", "4 Pillowcases: 50x70 cm", "Product Features:", "120 Thread Count", "Material: 100% Cotton Satin", "Washing and Care Recommendations:", "Wash at 30 degrees warm water, inside out.", "Do not use bleach.", "Wash at low heat."]
@@ -694,10 +737,10 @@ export const getProductsData = () => [
     {
         productId: 'product-27',
         title: "Depa H2o Borosilicate Glass Bottle Vacuum Lid Black 1000ML",
-        category: 'Home & Living', price: '5.76', oldPrice: '10.00',
+        category: 'Home & Living', apiCategoryId: null, price: '5.76', oldPrice: '10.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/92cc28e2-6801-4c14-8b4b-2f277d4742fe/image_3840.webp',
         brand: 'Depa', productCode: 'DEP-H2O-BLK1L', rating: 4.5, availability: 'In Stock',
-        description: 'Heat-resistant borosilicate glass water bottle with vacuum lid.', colors: ['#000000', '#FFFFFF'], sizes: ['1000ML'], // Black Lid, Clear Glass
+        description: 'Heat-resistant borosilicate glass water bottle with vacuum lid.', colors: ['#000000', '#FFFFFF'], sizes: ['1000ML'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/92cc28e2-6801-4c14-8b4b-2f277d4742fe/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/07adbe97-f1be-4dad-afc9-d3cffba6621d/image_3840.webp'],
         detailPrice: '5.76', detailOldPrice: '10.00',
         detailedDescription: ["Heat-resistant structure and stylish design, always with you.", "Made of glass material.", "Does not cause mold or odor.", "Easy to clean.", "Dishwasher safe.", "BPA-free, suitable for food contact.", "Height: 25 cm", "Volume: 1 Lt", "Contact us immediately if there is a problem with your purchased products.", "Return Conditions: Products must be returned wrapped in bubble wrap, boxed, and with intact packaging as received. Otherwise, returns will not be accepted."]
@@ -706,10 +749,10 @@ export const getProductsData = () => [
     {
         productId: 'product-28',
         title: "Depa Set of 2 Olive Oil/Liquid Oil Bottles with Bamboo Stand",
-        category: 'Home & Living', price: '5.76', oldPrice: '10.00',
+        category: 'Home & Living', apiCategoryId: null, price: '5.76', oldPrice: '10.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/720f7b45-c9f4-4436-8137-ab8c4044ef1a/image_3840.webp',
         brand: 'Depa', productCode: 'DEP-OILSET-BAM', rating: 4.6, availability: 'In Stock',
-        description: 'Set of 2 non-drip 750ml glass oil bottles with bamboo stand.', colors: ['#FFFFFF', '#DEB887'], sizes: ['Set'], // Clear Glass, Bamboo
+        description: 'Set of 2 non-drip 750ml glass oil bottles with bamboo stand.', colors: ['#FFFFFF', '#DEB887'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/720f7b45-c9f4-4436-8137-ab8c4044ef1a/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/9e6a280e-8c80-4d02-8bef-2c603ee4f158/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d9bbdd3a-e856-4b0d-b273-ce36c578c2b2/image_3840.webp'],
         detailPrice: '5.76', detailOldPrice: '10.00',
         detailedDescription: ["Made of glass.", "Ideal for storing liquid oil and varieties.", "Dishwasher safe without the cap.", "Bottle height: 29 cm", "Consists of 2 x 750 ml Oil Bottles and 1 Bamboo Stand.", "Ews Kitchenware aims to serve its customers with practical, sturdy, and long-lasting kitchen utensils.", "Contact us immediately if there is a problem with your purchased product.", "Return Conditions: Products must be returned wrapped in bubble wrap, boxed, and with intact packaging as received. Otherwise, returns will not be accepted."]
@@ -718,10 +761,10 @@ export const getProductsData = () => [
     {
         productId: 'product-29',
         title: "Depa Set of 9 Glass Jars with Bamboo Vacuum Lid (3x1.3L, 3x0.8L, 3x0.5L)",
-        category: 'Home & Living', price: '25.76', oldPrice: '40.00',
+        category: 'Home & Living', apiCategoryId: null, price: '25.76', oldPrice: '40.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/27fa85d7-a0c0-4df0-98e7-5786994e2aa9/image_3840.webp',
         brand: 'Depa', productCode: 'DEP-JARSET9-BAM', rating: 4.8, availability: 'In Stock',
-        description: 'Set of 9 borosilicate glass jars with vacuum bamboo lids.', colors: ['#FFFFFF', '#DEB887'], sizes: ['Set'], // Clear Glass, Bamboo
+        description: 'Set of 9 borosilicate glass jars with vacuum bamboo lids.', colors: ['#FFFFFF', '#DEB887'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/27fa85d7-a0c0-4df0-98e7-5786994e2aa9/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d21c2426-94e5-49da-858a-d5f457012129/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/8acbd46d-3361-4fbc-978e-8b02568b03ab/image_3840.webp'],
         detailPrice: '25.76', detailOldPrice: '40.00',
         detailedDescription: ["Borosilicate glass jars, known for their 100% lead-free and impact-resistant structure, are the healthiest tool for storing legumes and various foods.", "Bamboo lids that vacuum the air inside the jar prevent insects in legumes and foods.", "Jars are dishwasher safe.", "Washing bamboo lids in the dishwasher is not recommended.", "Ews Kitchenware aims to serve its customers with practical, sturdy, and long-lasting kitchen utensils.", "Contact us immediately if there is a problem with your purchased product.", "Return Conditions: Products must be returned wrapped in bubble wrap, boxed, and with intact packaging as received. Otherwise, returns will not be accepted."]
@@ -730,22 +773,22 @@ export const getProductsData = () => [
     {
         productId: 'product-30',
         title: "Depa 12-Piece Spice Set with Spoons & Stand",
-        category: 'Home & Living', price: '16.48', oldPrice: '20.00',
+        category: 'Home & Living', apiCategoryId: null, price: '16.48', oldPrice: '20.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d32724b0-e998-4d19-bf77-a6b17c7264d4/image_3840.webp',
         brand: 'Depa', productCode: 'DEP-SPICESET-12', rating: 4.4, availability: 'In Stock',
-        description: '12-piece spice jar set with spoons and a stand.', colors: ['#FFFFFF', '#C0C0C0'], sizes: ['Set'], // Clear Glass, Silver
+        description: '12-piece spice jar set with spoons and a stand.', colors: ['#FFFFFF', '#C0C0C0'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d32724b0-e998-4d19-bf77-a6b17c7264d4/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/1481857a-1150-4df8-aad6-09c5503dfac3/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/887e3bb7-6eb3-49bc-a83c-7c592a1d2303/image_3840.webp'],
         detailPrice: '16.48', detailOldPrice: '20.00',
-        detailedDescription: ["Stylish and practical 12-piece spice set.", "Includes jars, spoons, and a stand.", "Keeps your spices organized and accessible."] // Placeholder details
+        detailedDescription: ["Stylish and practical 12-piece spice set.", "Includes jars, spoons, and a stand.", "Keeps your spices organized and accessible."]
     },
     // 31. Ürün
     {
         productId: 'product-31',
         title: "Depa 18-Piece Baroque Round Jar Set (6x2L, 6x1L, 6x0.5L)",
-        category: 'Home & Living', price: '16.48', oldPrice: '20.00',
+        category: 'Home & Living', apiCategoryId: null, price: '16.48', oldPrice: '20.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/3aaa71b1-33c2-4218-8181-978929c34ca8/image_3840.webp',
         brand: 'Depa', productCode: 'DEP-JARSET18-BAR', rating: 4.7, availability: 'In Stock',
-        description: 'Set of 18 acrylic storage jars in 3 sizes.', colors: ['#FFFFFF'], sizes: ['Set'], // Clear with pattern
+        description: 'Set of 18 acrylic storage jars in 3 sizes.', colors: ['#FFFFFF'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/3aaa71b1-33c2-4218-8181-978929c34ca8/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/e3d68acc-8177-4d24-b3e1-b88694316196/image_3840.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/45c5cdf2-4044-4fc3-8801-81ed238b20cf/image_3840.webp'],
         detailPrice: '16.48', detailOldPrice: '20.00',
         detailedDescription: ["Aesthetic acrylic jar set consisting of 6 pieces each of 3 different sizes, ideal for storing groceries or any product you want to store.", "PRODUCT INFO SIZE 2: W: 8 CM L: 8 CM H: 11.5 CM VOL: 500 ML", "PRODUCT INFO SIZE 3: W: 10 CM L: 10 CM H: 14.5 CM VOL: 1000 ML", "PRODUCT INFO SIZE 4: W: 12.5 CM L: 12.5 CM H: 18 CM VOL: 2000 ML", "Ews Kitchenware aims to serve its customers with practical, sturdy, and long-lasting acrylic kitchen utensils.", "Contact us immediately if there is a problem with your purchased products.", "Return Conditions: Products must be returned wrapped in bubble wrap, boxed, and with intact packaging as received. Otherwise, returns will not be accepted."]
@@ -754,10 +797,10 @@ export const getProductsData = () => [
     {
         productId: 'product-32',
         title: "Cotton Box Pera Grey 8-Piece Linen Tablecloth Set",
-        category: 'Home & Living', price: '25.76', oldPrice: '40.00',
-        imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ab32b9aa-da34-40c1-a5bc-fdef1c02143b/3840/24905-cotton-box-pera-beyaz-8-parca-keten-masa-ortusu-14667.webp', // Image is actually white, using grey placeholder
+        category: 'Home & Living', apiCategoryId: null, price: '25.76', oldPrice: '40.00',
+        imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ab32b9aa-da34-40c1-a5bc-fdef1c02143b/3840/24905-cotton-box-pera-beyaz-8-parca-keten-masa-ortusu-14667.webp',
         brand: 'Cotton Box', productCode: 'CB-TABLE-PERAGRY', rating: 4.6, availability: 'In Stock',
-        description: '8-piece grey linen blend tablecloth set.', colors: ['#808080'], sizes: ['Set'], // Grey
+        description: '8-piece grey linen blend tablecloth set.', colors: ['#808080'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/ab32b9aa-da34-40c1-a5bc-fdef1c02143b/3840/24905-cotton-box-pera-beyaz-8-parca-keten-masa-ortusu-14667.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/cb6a7c57-65af-4abb-a405-691fb85b9fc1/3840/24906-cotton-box-pera-beyaz-8-parca-keten-masa-ortusu-14668.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/21726d40-c1dd-40b4-9591-4f1cdc2875fd/3840/24908-cotton-box-pera-beyaz-8-parca-keten-masa-ortusu-14670.webp'],
         detailPrice: '25.76', detailOldPrice: '40.00',
         detailedDescription: ["Tablecloth: 175x240 cm", "Runner: 40x140 cm", "Napkins: 40x40 cm (6 Pieces)", "Fabric: 90% Polyester - 10% Cotton"]
@@ -766,10 +809,10 @@ export const getProductsData = () => [
     {
         productId: 'product-33',
         title: "Cotton Box Pera White 8-Piece Linen Tablecloth Set",
-        category: 'Home & Living', price: '25.76', oldPrice: '40.00',
-        imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/eb598542-6cee-4eff-9a6a-ce0e296bb0eb/3840/24901-cotton-box-pera-toprak-8-parca-keten-masa-ortusu-14663.webp', // Image is actually earth tone, using white placeholder
+        category: 'Home & Living', apiCategoryId: null, price: '25.76', oldPrice: '40.00',
+        imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/eb598542-6cee-4eff-9a6a-ce0e296bb0eb/3840/24901-cotton-box-pera-toprak-8-parca-keten-masa-ortusu-14663.webp',
         brand: 'Cotton Box', productCode: 'CB-TABLE-PERAWHT', rating: 4.7, availability: 'In Stock',
-        description: '8-piece white linen blend tablecloth set.', colors: ['#FFFFFF'], sizes: ['Set'], // White
+        description: '8-piece white linen blend tablecloth set.', colors: ['#FFFFFF'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/eb598542-6cee-4eff-9a6a-ce0e296bb0eb/3840/24901-cotton-box-pera-toprak-8-parca-keten-masa-ortusu-14663.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/fa396749-2f71-44f0-b988-f412e6b5dd95/3840/24903-cotton-box-pera-toprak-8-parca-keten-masa-ortusu-14665.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/030bbc6e-c14a-4ba9-8c18-ac0eb8cd0930/3840/24904-cotton-box-pera-toprak-8-parca-keten-masa-ortusu-14666.webp'],
         detailPrice: '25.76', detailOldPrice: '40.00',
         detailedDescription: ["Tablecloth: 175x240 cm", "Runner: 40x140 cm", "Napkins: 40x40 cm (6 Pieces)", "Fabric: 90% Polyester - 10% Cotton"]
@@ -778,29 +821,30 @@ export const getProductsData = () => [
     {
         productId: 'product-34',
         title: "Cotton Box Pera Ecru 8-Piece Linen Tablecloth Set",
-        category: 'Home & Living', price: '25.76', oldPrice: '40.00',
-        imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/a11f20b8-77ae-4ad0-aebb-0c8faa6adda9/3840/24892-anna-karina-26-parca-masa-ortusu-seti-bahar-murdum-14652.webp', // Image is actually plum, using ecru placeholder
+        category: 'Home & Living', apiCategoryId: null, price: '25.76', oldPrice: '40.00',
+        imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/a11f20b8-77ae-4ad0-aebb-0c8faa6adda9/3840/24892-anna-karina-26-parca-masa-ortusu-seti-bahar-murdum-14652.webp',
         brand: 'Cotton Box', productCode: 'CB-TABLE-PERAECR', rating: 4.8, availability: 'In Stock',
-        description: '8-piece ecru linen blend tablecloth set.', colors: ['#C2B280'], sizes: ['Set'], // Ecru
+        description: '8-piece ecru linen blend tablecloth set.', colors: ['#C2B280'], sizes: ['Set'],
         detailImages: ['https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/a11f20b8-77ae-4ad0-aebb-0c8faa6adda9/3840/24892-anna-karina-26-parca-masa-ortusu-seti-bahar-murdum-14652.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/8c457884-54dc-4d72-a58b-b4163e8552b4/3840/24893-anna-karina-26-parca-masa-ortusu-seti-bahar-murdum-14653.webp', 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/d8a64339-d1ca-4d58-b727-ce0ca7542f71/3840/24896-anna-karina-26-parca-masa-ortusu-seti-bahar-murdum-14656.webp'],
         detailPrice: '25.76', detailOldPrice: '40.00',
         detailedDescription: ["Tablecloth: 175x240 cm", "Runner: 40x140 cm", "Napkins: 40x40 cm (6 Pieces)", "Fabric: 90% Polyester - 10% Cotton"]
     },
-    // 35. Ürün (Son Home & Living ürünü)
+    // 35. Ürün
     {
         productId: 'product-35',
         title: "Cotton Box Antique Jasmine Grey Linen Tablecloth",
         category: 'Home & Living',
+        apiCategoryId: null,
         price: '25.76',
         oldPrice: '40.00',
         imageUrl: 'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/4db18bda-4afa-4bc6-9e4e-491572fdbc12/image_3840.webp',
         brand: 'Cotton Box',
-        productCode: 'CB-TABLE-ANTJASGRY', // Placeholder
-        rating: 4.5, // Placeholder
-        availability: 'In Stock', // Placeholder
-        description: 'Antique Jasmine grey linen blend tablecloth set.', // Kısa açıklama
-        colors: ['#808080'], // Grey
-        sizes: ['Set'], // Placeholder size for potential filtering
+        productCode: 'CB-TABLE-ANTJASGRY',
+        rating: 4.5,
+        availability: 'In Stock',
+        description: 'Antique Jasmine grey linen blend tablecloth set.',
+        colors: ['#808080'],
+        sizes: ['Set'],
         detailImages: [
             'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/4db18bda-4afa-4bc6-9e4e-491572fdbc12/image_3840.webp',
             'https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/66fe6ea9-5394-44cd-814e-36760dd7a4da/image_3840.webp'
@@ -812,6 +856,99 @@ export const getProductsData = () => [
             "Runner: 35x130 cm",
             "Fabric: 100% Polyester"
         ]
-        // sizeChartUrl alanı bu üründe yok
+    },
+    // YENİ EKLENECEK İNGİLİZCE ÜRÜN BİLGİSİ
+    {
+        productId: 'product-36', // Lütfen kendi sıralamanıza göre güncelleyin (örn: product-X)
+        title: "Women's Lycra Sleeve Crop Top",
+        category: 'Women', 
+        gender: 'k',
+        apiCategoryId: 1, // API Category ID for Women's T-Shirt (Lütfen kontrol edin, 1 olduğunu varsaydım)
+        price: '9.48', 
+        oldPrice: '15.00', 
+        imageUrl: "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/222b0f82-8905-44d5-b5fb-0ee1c274096c/3840/2318-beyaz.webp", 
+        brand: 'İlke İç Giyim', 
+        productCode: 'ILKE-2318', 
+        rating: 4.83,
+        availability: 'In Stock', 
+        description: 'Women\'s regular fit, collared crop top made from lycra fabric, 92% Cotton 8% Elastane.',
+        colors: [
+            {
+                name: 'White',
+                hex: '#FFFFFF',
+                default: true,
+                images: [
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/222b0f82-8905-44d5-b5fb-0ee1c274096c/3840/2318-beyaz.webp",
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/8a3c5f2c-0e80-4b96-be65-b08733c2190c/3840/2318-beyaz-arka.webp"
+                ]
+            },
+            {
+                name: 'Black',
+                hex: '#000000',
+                images: [
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/96ce416e-8be4-47b3-a1c0-60c67aaffe9d/3840/2318-siyah.webp",
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/8a342dfd-b0b8-46ff-a3ba-f89bd5ce6fc0/3840/2318-siyah-arka.webp"
+                ]
+            }
+        ],
+        sizes: ['XS', 'S', 'M', 'L', 'XL'],
+        detailPrice: '9.48',
+        detailOldPrice: '15.00',
+        detailedDescription: [
+            "Fabric Information: 92% Cotton 8% Elastane",
+            "Fit Information: Regular Fit"
+        ],
+        sizeChartUrl: "https://cdn.sportdirect.com/files/website-images/Stanno/Stanno-Size-chart-2024-3.webp" 
+    },
+    // --- YENİ ÜRÜN: Kadın Lacivert Jean Etek ---
+    {
+        productId: 'product-37', // Lütfen kendi sıralamanıza göre güncelleyin
+        title: "Women's Navy Jean Skirt",
+        category: 'Women',
+        gender: 'k',
+        apiCategoryId: 5, // Kadın Etek için API Kategori ID'si (Varsayım: 5 - Lütfen kontrol edin!)
+        price: '12.36',
+        oldPrice: '18.00',
+        imageUrl: "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/2325ddb9-f4a5-40d6-ac2b-03d540b61081/3840/10-16s101-1-8.webp", // Ana görsel
+        brand: 'Blue White',
+        productCode: '16S101-1',
+        rating: 3.83,
+        availability: 'In Stock',
+        description: 'Women\'s regular fit navy jean skirt made from 98% Cotton 2% Elastane fabric. Timeless piece for casual or chic combinations.',
+        // Tek renk olduğu için colors array'i tek elemanlı
+        colors: [
+            {
+                name: 'Navy',
+                hex: '#000080', // Lacivert için yaklaşık hex kodu
+                default: true,
+                images: [
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/2325ddb9-f4a5-40d6-ac2b-03d540b61081/3840/10-16s101-1-8.webp",
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/78be01f5-20c5-4b73-b2d7-cdece3319656/3840/10-16s101-1-14.webp",
+                    "https://cdn.myikas.com/images/41c3d708-7e1f-44e8-8f55-8a3be5a9be11/cef3f259-dfc6-40ed-a807-7d423c479816/3840/10-16s101-1-19.webp"
+                ]
+            }
+        ],
+        sizes: ['XS', 'S', 'M', 'L', 'XL'], // Örnek bedenler
+        detailPrice: '12.36',
+        detailOldPrice: '18.00',
+        detailedDescription: [
+            "Fabric Information: 98% Cotton 2% Elastane",
+            "Fit Information: Regular Fit",
+            "Model's Measurements: Height: 1.76, Chest: 91, Waist: 63, Hips: 95",
+            "Sample Size: S",
+            "Skirt length: 50 cm.",
+            "There is a 1-2 cm difference between sizes.",
+            "Skirt colors may vary slightly due to light differences in studio shots.",
+            "Skirts are timeless pieces you can wear in summer and winter with their comfortable cuts, different designs, and models.",
+            "You can wear these skirts, which you can combine both sporty and chic, with many different pieces from crop-top t-shirts to oversized sweaters, from jackets to colorful shirts.",
+            "Made from 1st quality fabric.",
+            "You can choose your own size.",
+            "Wash at a maximum temperature of 30 °C, do not use bleach.",
+            "Do not tumble dry.",
+            "Iron at low temperature.",
+            "You can choose Jean skirt models that mark elegance for either office or daily wear.",
+            "You can discover many denim skirt models that stand out in the new season in the category, examine the pieces that add color to the season and liven up your combinations."
+        ],
+        sizeChartUrl: "https://cdn.sportdirect.com/files/website-images/Stanno/Stanno-Size-chart-2024-3.webp" // Önceki kadın ürününden
     }
 ]; 

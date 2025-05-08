@@ -1,6 +1,8 @@
 import {
   FETCH_STATES,
-  SET_CATEGORIES,
+  SET_CATEGORIES_REQUEST,
+  SET_CATEGORIES_SUCCESS,
+  SET_CATEGORIES_FAILURE,
   SET_PRODUCT_LIST,
   SET_TOTAL,
   SET_FETCH_STATE,
@@ -12,6 +14,8 @@ import {
 // Başlangıç Durumu (Initial State)
 const initialState = {
   categories: [], // Kategori listesi
+  categoriesFetchState: FETCH_STATES.NOT_FETCHED, // Kategoriler için yüklenme durumu - YENİ
+  categoriesError: null, // Kategori çekme hatası - YENİ
   productList: [], // Ürün listesi
   total: 0, // Toplam ürün sayısı
   limit: 25, // Sayfa başına ürün sayısı
@@ -23,8 +27,27 @@ const initialState = {
 // Product Reducer Fonksiyonu
 const productReducer = (state = initialState, action) => {
   switch (action.type) {
-    case SET_CATEGORIES:
-      return { ...state, categories: action.payload };
+    // Kategori Action'ları - YENİ / GÜNCELLENDİ
+    case SET_CATEGORIES_REQUEST:
+      return {
+        ...state,
+        categoriesFetchState: FETCH_STATES.FETCHING,
+        categoriesError: null, // Önceki hatayı temizle
+      };
+    case SET_CATEGORIES_SUCCESS: // Eski SET_CATEGORIES yerine
+      return {
+        ...state,
+        categories: action.payload,
+        categoriesFetchState: FETCH_STATES.FETCHED,
+      };
+    case SET_CATEGORIES_FAILURE:
+      return {
+        ...state,
+        categoriesFetchState: FETCH_STATES.FAILED,
+        categoriesError: action.payload,
+      };
+
+    // Mevcut Product Action'ları (dokunmayın)
     case SET_PRODUCT_LIST:
       return { ...state, productList: action.payload };
     case SET_TOTAL:

@@ -3,7 +3,14 @@ import { Link } from 'react-router-dom';
 
 // Placeholder for individual category item
 const CategoryItem = ({ imageUrl, label, className = "", isMobile = false }) => {
-  const categoryPath = `/shop/${label.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-')}`;
+  let categoryPath = '/shop'; // Varsayılan
+  if (label === 'MEN') {
+    categoryPath = '/shop/e'; // Erkek için /shop/e
+  } else if (label === 'WOMEN') {
+    categoryPath = '/shop/k'; // Kadın için /shop/k
+  } else if (label === 'HOME & LIVING') {
+    categoryPath = '/shop/home-living'; // Home & Living için özel yolumuz
+  }
 
   return (
     <Link to={categoryPath} className={`relative block overflow-hidden group ${className} ${isMobile ? 'aspect-[3/4]' : 'md:aspect-auto'} bg-gray-200`}>

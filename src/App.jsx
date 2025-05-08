@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { verifyToken } from './store/actions/clientActions';
+import { fetchCategories } from './store/actions/productActions';
 import HomePage from './pages/HomePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ContactPage from './pages/ContactPage';
@@ -18,6 +19,7 @@ function App() {
 
   useEffect(() => {
     dispatch(verifyToken());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   return (
@@ -31,8 +33,21 @@ function App() {
         <Route path="/about" component={AboutUsPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
-        <Route path="/shop/:categoryName" component={ShopPage} />
+
+        {/* SHOP ROTASLARI - YENİ SIRALAMA VE ROTA */}
+        {/* 1. En spesifik: "Home & Living" için özel yol */}
+        <Route path="/shop/home-living" component={ShopPage} />
+
+        {/* 2. API Kategorileri (üç parametreli) */}
+        <Route path="/shop/:gender/:categorySlug/:categoryId" component={ShopPage} />
+
+        {/* 3. YENİ: Sadece Cinsiyet (iki parametreli, :gender 'k' veya 'e' olacak) */}
+        {/*    Bu, /shop/home-living ve /shop/:g/:c/:id ile eşleşmeyenleri yakalar */}
+        <Route path="/shop/:gender" component={ShopPage} />
+
+        {/* 4. En genel: Sadece /shop (Tüm Ürünler) */}
         <Route path="/shop" exact component={ShopPage} />
+
         <ProtectedRoute path="/checkout" component={() => <div>Checkout Page (Protected)</div>} />
         <ProtectedRoute path="/orders" component={() => <div>Order History Page (Protected)</div>} />
       </Switch>

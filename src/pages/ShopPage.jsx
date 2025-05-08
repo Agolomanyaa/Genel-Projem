@@ -1,62 +1,90 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import ProductGrid from '../components/ProductGrid';
 import { getProductsData } from '../data/products.js';
+import { useSelector } from 'react-redux';
 
 const ShopPage = () => {
-  const { categoryName } = useParams();
+  const params = useParams();
+  const location = useLocation();
+  const { gender, categorySlug, categoryId } = params;
+
   const allProducts = getProductsData();
+  const { categories: allApiCategories } = useSelector((state) => state.product);
 
-  // Kategoriye göre filtrele
-  const filteredProducts = categoryName
-    ? allProducts.filter(product =>
-        // Ürün kategorisini küçük harfe çevirip boşlukları tire ile değiştirerek karşılaştır
-        product.category?.toLowerCase().replace(/\s+&\s+/g, '-').replace(/\s+/g, '-') === categoryName
-      )
-    : allProducts;
+  let filteredProducts = [];
+  let pageTitle = 'Shop';
+  let breadcrumbSegments = [{ name: 'Shop', path: '/shop' }];
 
-  // Kategori adını başlık için düzenle (tireleri boşluğa çevir, ilk harfleri büyük yap)
-  const pageTitle = categoryName
-    ? categoryName
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-    : 'All Products';
+  if (location.pathname === '/shop/home-living') {
+    pageTitle = 'Home & Living';
+    filteredProducts = allProducts.filter(
+      (product) => product.apiCategoryId === null
+    );
+    breadcrumbSegments.push({ name: pageTitle });
+  }
+  else if (categoryId && gender && gender !== 'static') {
+    const currentCategoryObject = allApiCategories.find(cat => cat.id.toString() === categoryId);
+
+    if (currentCategoryObject) {
+      pageTitle = currentCategoryObject.title;
+      filteredProducts = allProducts.filter(product => product.apiCategoryId?.toString() === categoryId && product.gender === gender);
+      breadcrumbSegments.push({ name: pageTitle });
+    } else {
+      pageTitle = 'Category Not Found';
+      breadcrumbSegments.push({ name: pageTitle });
+      console.warn(`[ShopPage] API Category object not found for ID: ${categoryId} and Gender: ${gender}`);
+    }
+  }
+  else if (gender && gender !== 'static' && !categoryId) {
+    pageTitle = gender.toLowerCase() === 'k' ? 'Women' : gender.toLowerCase() === 'e' ? 'Men' : 'Shop';
+    filteredProducts = allProducts.filter(p => p.gender?.toLowerCase() === gender.toLowerCase());
+    breadcrumbSegments.push({ name: pageTitle });
+  }
+  else if (location.pathname === '/shop') {
+    pageTitle = 'All Products';
+    filteredProducts = allProducts;
+  }
+  else {
+    console.warn(`[ShopPage] Fallback: No specific category route matched. Path: ${location.pathname}. Params:`, params);
+    pageTitle = 'All Products';
+    filteredProducts = allProducts;
+  }
 
   return (
     <MainLayout>
-      {/* Breadcrumb (İsteğe bağlı) */}
       <section className="bg-lighter-bg py-6">
-        <div className="container mx-auto px-6 flex items-center">
-          <Link to="/" className="text-dark-text font-bold hover:text-primary text-sm">Home</Link>
-          <span className="text-muted-text mx-2">{'>'}</span>
-          {/* Shop ana sayfasına link ekleyebiliriz */}
-          <Link to="/shop" className="text-muted-text hover:text-primary text-sm">Shop</Link>
-          {categoryName && (
-            <>
+        <div className="container mx-auto px-6 flex items-center text-sm">
+          <Link to="/" className="text-dark-text font-bold hover:text-primary">Home</Link>
+          {breadcrumbSegments.map((segment, index) => (
+            <React.Fragment key={index}>
               <span className="text-muted-text mx-2">{'>'}</span>
-              <span className="text-second-text text-sm font-bold">{pageTitle}</span>
-            </>
-          )}
+              {segment.path ? (
+                <Link to={segment.path} className="text-muted-text hover:text-primary">
+                  {segment.name}
+                </Link>
+              ) : (
+                <span className="text-second-text font-bold">{segment.name}</span>
+              )}
+            </React.Fragment>
+          ))}
         </div>
       </section>
 
-      {/* Filtreleme/Sıralama Çubuğu (İsteğe Bağlı - Şimdilik Basit) */}
-       <section className="bg-white py-4 border-b border-gray-200">
-          <div className="container mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="text-second-text text-sm font-bold">
-                  Showing {filteredProducts.length} results{categoryName ? ` for ${pageTitle}` : ''}
-              </div>
-              {/* Diğer filtreleme/sıralama seçenekleri buraya eklenebilir */}
+      <section className="bg-white py-4 border-b border-gray-200 mt-[90px]">
+        <div className="container mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="text-second-text text-sm font-bold">
+            Showing {filteredProducts.length} results{pageTitle !== 'All Products' && pageTitle !== 'Shop' ? ` for ${pageTitle}` : ''}
           </div>
+        </div>
       </section>
 
-
-      {/* Ürün Grid'i */}
       <div className="container mx-auto px-6 py-10">
-        {/* Filtrelenmiş ürünleri ProductGrid'e prop olarak geçir */}
-        <ProductGrid title={categoryName ? `${pageTitle} Products` : ''} products={filteredProducts} />
+        <ProductGrid 
+          title={pageTitle !== 'All Products' && pageTitle !== 'Shop' ? pageTitle : ''} 
+          products={filteredProducts} 
+        />
       </div>
     </MainLayout>
   );
