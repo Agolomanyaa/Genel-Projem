@@ -1,23 +1,14 @@
-import React from 'react';
+// ... existing code ...
 import { useSelector } from 'react-redux'; // Redux store'a erişim için
-import { Link } from 'react-router-dom'; // Link oluşturmak için
-import MainLayout from '../layouts/MainLayout'; // Uzantı belirtmeye gerek yok
-import HeroSection from '../components/HeroSection'; // Uzantı belirtmeye gerek yok
-import EditorPicks from '../components/EditorPicks'; // Uzantı belirtmeye gerek yok
-import ProductGrid from '../components/ProductGrid'; // Uzantı belirtmeye gerek yok
-// Veriyi yeni merkezi dosyadan import et
-import { getProductsData } from '../data/products.js';
-// Import other sections as needed
-// import FeaturedPosts from '../components/FeaturedPosts';
-import { FETCH_STATES } from '../store/actions/productActions'; // FETCH_STATES'i import ediyoruz
-
-// HomePage'e özgü diğer bileşenleri buraya import edebilirsiniz
-// import HeroSection from '../components/HeroSection';
-// import ProductList from '../components/ProductList';
-// import EditorPicks from '../components/EditorPicks';
+import { Link } from 'react-router-dom';
+import MainLayout from '../layouts/MainLayout';
+import HeroSection from '../components/HeroSection';
+import EditorPicks from '../components/EditorPicks';
+import ProductGrid from '../components/ProductGrid';
+// import { getProductsData } from '../data/products.js'; // ARTIK GEREK YOK!
+import { FETCH_STATES } from '../store/actions/productActions';
 
 // URL için 'slug' oluşturma yardımcı fonksiyonu
-// Bu fonksiyonu projenizde bir utils dosyasına taşıyıp oradan import edebilirsiniz (örn: src/utils/slugify.js)
 const createCategorySlug = (title) => {
   if (!title) return '';
   return title
@@ -33,22 +24,20 @@ const createCategorySlug = (title) => {
 };
 
 const HomePage = () => {
-  const allProducts = getProductsData();
+  // Ürünleri Redux store'dan al
+  const { productList: allProducts, productsFetchState, productsError } = useSelector((state) => state.product);
 
-  // Bestseller için ilk 5 erkek (1-5) VE ilk 5 kadın (11-15) ürün ID'lerini seçelim
-  const bestsellerProductIds = [
-    'product-1', 'product-2', 'product-3', 'product-4', 'product-5', // Erkek
-    'product-11', 'product-12', 'product-13', 'product-14', 'product-15' // Kadın
-  ];
-  const bestsellerProducts = allProducts.filter(product => bestsellerProductIds.includes(product.productId));
+  // Bestseller için örnek: ilk 10 ürünü al
+  const bestsellerProducts = allProducts.slice(0, 10);
 
-  // Redux store'dan kategorileri ve yüklenme durumunu al
+  // Kategorileri Redux store'dan al
   const {
     categories,
     categoriesFetchState,
     categoriesError
   } = useSelector((state) => state.product);
 
+  // ... existing code for topCategoriesContent ...
   let topCategoriesContent;
 
   if (categoriesFetchState === FETCH_STATES.FETCHING) {
@@ -90,8 +79,7 @@ const HomePage = () => {
 
   return (
     <MainLayout>
-      {/* Navbar için boşluk bırakacak sarmalayıcı div */}
-      <div className="mt-[90px]"> {/* TÜM İÇERİĞİ AŞAĞI İTMEK İÇİN */}
+      <div className="mt-[90px]">
         <HeroSection />
         <EditorPicks />
 
@@ -107,9 +95,11 @@ const HomePage = () => {
 
         <ProductGrid title="BESTSELLER PRODUCTS" products={bestsellerProducts} />
         {/* <FeaturedPosts /> */}
-      </div> {/* Sarmalayıcı div'in kapanışı */}
+      </div>
     </MainLayout>
   );
 };
 
 export default HomePage;
+
+// ... existing code ...

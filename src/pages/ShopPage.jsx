@@ -1,55 +1,84 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import ProductGrid from '../components/ProductGrid';
-import { getProductsData } from '../data/products.js';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { FETCH_STATES } from '../store/actions/productActions';
 
 const ShopPage = () => {
   const params = useParams();
   const location = useLocation();
   const { gender, categorySlug, categoryId } = params;
+  const dispatch = useDispatch();
 
-  const allProducts = getProductsData();
-  const { categories: allApiCategories } = useSelector((state) => state.product);
+  const {
+    productList,
+    totalProducts,
+    productsFetchState,
+    productsError,
+    categories: allApiCategories,
+  } = useSelector((state) => state.product);
 
   let filteredProducts = [];
   let pageTitle = 'Shop';
   let breadcrumbSegments = [{ name: 'Shop', path: '/shop' }];
 
-  if (location.pathname === '/shop/home-living') {
-    pageTitle = 'Home & Living';
-    filteredProducts = allProducts.filter(
-      (product) => product.apiCategoryId === null
-    );
-    breadcrumbSegments.push({ name: pageTitle });
-  }
-  else if (categoryId && gender && gender !== 'static') {
-    const currentCategoryObject = allApiCategories.find(cat => cat.id.toString() === categoryId);
-
-    if (currentCategoryObject) {
-      pageTitle = currentCategoryObject.title;
-      filteredProducts = allProducts.filter(product => product.apiCategoryId?.toString() === categoryId && product.gender === gender);
+  if (productsFetchState === FETCH_STATES.FETCHED && productList.length > 0) {
+    if (location.pathname === '/shop/home-living') {
+      pageTitle = 'Home & Living';
+      filteredProducts = productList.filter(
+        (product) => product.apiCategoryId === null
+      );
       breadcrumbSegments.push({ name: pageTitle });
-    } else {
-      pageTitle = 'Category Not Found';
+    }
+    else if (categoryId && gender && gender !== 'static') {
+      filteredProducts = productList.filter(product => {
+        const categoryObj = allApiCategories.find(cat => cat.id === product.category_id);
+        return (
+          String(product.category_id) === String(categoryId) &&
+          categoryObj &&
+          categoryObj.gender === gender
+        );
+      });
       breadcrumbSegments.push({ name: pageTitle });
-      console.warn(`[ShopPage] API Category object not found for ID: ${categoryId} and Gender: ${gender}`);
+    }
+    else if (gender && gender !== 'static' && !categoryId) {
+      filteredProducts = productList.filter(product => {
+        const categoryObj = allApiCategories.find(cat => cat.id === product.category_id);
+        return categoryObj && categoryObj.gender === gender;
+      });
+      breadcrumbSegments.push({ name: pageTitle });
+    }
+    else if (location.pathname === '/shop') {
+      pageTitle = 'All Products';
+      filteredProducts = productList;
+    }
+    else {
+      console.warn(`[ShopPage] Fallback: No specific category route matched. Path: ${location.pathname}. Params:`, params);
+      pageTitle = 'All Products';
+      filteredProducts = productList;
     }
   }
-  else if (gender && gender !== 'static' && !categoryId) {
-    pageTitle = gender.toLowerCase() === 'k' ? 'Women' : gender.toLowerCase() === 'e' ? 'Men' : 'Shop';
-    filteredProducts = allProducts.filter(p => p.gender?.toLowerCase() === gender.toLowerCase());
-    breadcrumbSegments.push({ name: pageTitle });
+
+  if (productsFetchState === FETCH_STATES.FETCHING) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-6 py-10 text-center">
+          <p className="text-xl text-gray-700">Loading products...</p>
+        </div>
+      </MainLayout>
+    );
   }
-  else if (location.pathname === '/shop') {
-    pageTitle = 'All Products';
-    filteredProducts = allProducts;
-  }
-  else {
-    console.warn(`[ShopPage] Fallback: No specific category route matched. Path: ${location.pathname}. Params:`, params);
-    pageTitle = 'All Products';
-    filteredProducts = allProducts;
+
+  if (productsFetchState === FETCH_STATES.FAILED) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-6 py-10 text-center">
+          <p className="text-xl text-red-600">Error loading products:</p>
+          <p className="text-md text-gray-700">{productsError || 'An unknown error occurred.'}</p>
+        </div>
+      </MainLayout>
+    );
   }
 
   return (
@@ -81,10 +110,23 @@ const ShopPage = () => {
       </section>
 
       <div className="container mx-auto px-6 py-10">
-        <ProductGrid 
-          title={pageTitle !== 'All Products' && pageTitle !== 'Shop' ? pageTitle : ''} 
-          products={filteredProducts} 
-        />
+        {productsFetchState === FETCH_STATES.FETCHED && filteredProducts.length === 0 && productList.length > 0 && (
+          <div className="text-center py-10">
+            <p className="text-xl text-gray-700">No products found matching your criteria.</p>
+          </div>
+        )}
+        {productsFetchState === FETCH_STATES.FETCHED && productList.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-xl text-gray-700">No products available at the moment.</p>
+            <p className="text-md text-gray-500">Please check back later.</p>
+          </div>
+        )}
+        {filteredProducts.length > 0 && (
+          <ProductGrid
+            title={pageTitle !== 'All Products' && pageTitle !== 'Shop' ? pageTitle : ''}
+            products={filteredProducts}
+          />
+        )}
       </div>
     </MainLayout>
   );

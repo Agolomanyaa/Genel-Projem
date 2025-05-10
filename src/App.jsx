@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { verifyToken } from './store/actions/clientActions';
-import { fetchCategories } from './store/actions/productActions';
+import { fetchCategories, fetchProducts } from './store/actions/productActions';
 import HomePage from './pages/HomePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ContactPage from './pages/ContactPage';
@@ -20,6 +20,7 @@ function App() {
   useEffect(() => {
     dispatch(verifyToken());
     dispatch(fetchCategories());
+    dispatch(fetchProducts());
   }, [dispatch]);
 
   return (
@@ -50,6 +51,9 @@ function App() {
 
         <ProtectedRoute path="/checkout" component={() => <div>Checkout Page (Protected)</div>} />
         <ProtectedRoute path="/orders" component={() => <div>Order History Page (Protected)</div>} />
+        <ProtectedRoute path="/cart" component={() => <div>Cart Page (Protected)</div>} />
+        <ProtectedRoute path="/order" component={() => <div>Order Page (Protected)</div>} />
+        <ProtectedRoute path="/order-confirmation" component={() => <div>Order Confirmation Page (Protected)</div>} />
       </Switch>
     </Router>
   );

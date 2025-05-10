@@ -26,7 +26,7 @@ const ProductGrid = ({ title, products }) => {
       {title && <h2 className="text-2xl font-bold text-dark-text text-center mb-8 uppercase">{title}</h2>} {/* Başlık büyük harf */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
         {productsToDisplay.map((product) => (
-          <ProductCard key={product.productId} product={product} />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
       {/* İsteğe bağlı: Daha Fazla Yükle butonu */}

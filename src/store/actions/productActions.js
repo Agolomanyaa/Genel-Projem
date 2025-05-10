@@ -12,9 +12,10 @@ export const FETCH_STATES = {
 export const SET_CATEGORIES_REQUEST = 'SET_CATEGORIES_REQUEST'; // Kategorileri çekme isteği başladı
 export const SET_CATEGORIES_SUCCESS = 'SET_CATEGORIES_SUCCESS'; // Kategoriler başarıyla çekildi (eski SET_CATEGORIES yerine)
 export const SET_CATEGORIES_FAILURE = 'SET_CATEGORIES_FAILURE'; // Kategori çekme hatası
-export const SET_PRODUCT_LIST = 'SET_PRODUCT_LIST';
-export const SET_TOTAL = 'SET_TOTAL';
-export const SET_FETCH_STATE = 'SET_FETCH_STATE'; // Ürünler için fetch state
+export const SET_PRODUCTS_REQUEST = 'SET_PRODUCTS_REQUEST'; // Ürünleri çekme isteği başladı
+export const SET_PRODUCTS_SUCCESS = 'SET_PRODUCTS_SUCCESS'; // Ürünler başarıyla çekildi
+export const SET_PRODUCTS_FAILURE = 'SET_PRODUCTS_FAILURE'; // Ürün çekme hatası
+export const SET_FETCH_STATE = 'SET_FETCH_STATE'; // Bu genel bir fetch state, ürünler için spesifik olanı kullanacağız
 export const SET_LIMIT = 'SET_LIMIT';
 export const SET_OFFSET = 'SET_OFFSET';
 export const SET_FILTER = 'SET_FILTER';
@@ -33,6 +34,22 @@ export const setCategoriesFailure = (error) => ({
   type: SET_CATEGORIES_FAILURE,
   payload: error,
 });
+
+// --- YENİ ÜRÜN ACTION CREATOR'LARI ---
+export const setProductsRequest = () => ({
+  type: SET_PRODUCTS_REQUEST,
+});
+
+export const setProductsSuccess = (products, total) => ({
+  type: SET_PRODUCTS_SUCCESS,
+  payload: { products, total }, // products ve total'ı tek payload'da gönder
+});
+
+export const setProductsFailure = (error) => ({
+  type: SET_PRODUCTS_FAILURE,
+  payload: error,
+});
+// ------------------------------------
 
 // --- Thunk Action Creator (Kategorileri Çekmek İçin) - YENİ EKLENDİ ---
 export const fetchCategories = () => async (dispatch) => {
@@ -65,15 +82,40 @@ export const fetchCategories = () => async (dispatch) => {
   }
 };
 
-export const setProductList = (products) => ({
-  type: SET_PRODUCT_LIST,
-  payload: products,
-});
+// --- YENİ THUNK ACTION CREATOR (ÜRÜNLERİ ÇEKMEK İÇİN) ---
+export const fetchProducts = (params = {}) => async (dispatch) => {
+  dispatch(setProductsRequest());
+  console.log('[fetchProducts] Request dispatched with params:', params);
+  try {
+    const response = await axiosInstance.get('/products', { params });
+    console.log('[fetchProducts] Response received (full data object):', response.data); // TÜM DATA OBJESİNİ LOGLA
 
-export const setTotal = (total) => ({
-  type: SET_TOTAL,
-  payload: total,
-});
+    if (response && response.status === 200 && response.data && typeof response.data.total === 'number' && Array.isArray(response.data.products)) {
+      console.log('[fetchProducts] Response status 200 and data structure is valid.');
+
+      console.log('--- API Product List Details (First 3 Products) ---');
+      response.data.products.slice(0, 3).forEach((product, index) => { // Sadece ilk 3 ürünü detaylı logla
+        console.log(`Product ${index + 1} (Full Object):`, product);
+        console.log(`Product ${index + 1} ID:`, product.id, '| Type:', typeof product.id);
+        console.log(`Product ${index + 1} Images Field (e.g., images, imageUrl, selling_price_list, thumbnail):`, product.images || product.imageUrl || product.selling_price_list || product.thumbnail || "COULD NOT DETECT IMAGE FIELD"); // Olası resim alanlarını kontrol et
+        console.log(`Product ${index + 1} Gender Field (e.g., gender, category.gender_id, sex):`, product.gender || product.category?.gender_id || product.sex || "COULD NOT DETECT GENDER FIELD"); // Olası gender alanlarını kontrol et
+        console.log(`Product ${index + 1} Category ID Field:`, product.category_id || product.categoryId || "COULD NOT DETECT CATEGORY ID FIELD"); // API Kategori ID'si
+      });
+      console.log('--------------------------------------------------');
+
+      dispatch(setProductsSuccess(response.data.products, response.data.total));
+      console.log('[fetchProducts] setProductsSuccess dispatched.');
+    } else {
+      console.error('[fetchProducts] ERROR: Invalid response structure or status!', response);
+      dispatch(setProductsFailure("Invalid response structure or status while fetching products."));
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to fetch products. Please try again later.";
+    console.error("[fetchProducts] CATCH BLOCK ERROR:", errorMessage, "Full error object:", error);
+    dispatch(setProductsFailure(errorMessage));
+  }
+};
+// ----------------------------------------------------------
 
 export const setFetchState = (fetchState) => ({
   type: SET_FETCH_STATE,
