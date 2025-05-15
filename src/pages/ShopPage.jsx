@@ -1,15 +1,23 @@
-import React, { useEffect } from 'react';
+// src/pages/ShopPage.jsx
+import React, { useEffect, useState } from 'react'; // useCallback kaldırıldı, şimdilik gerek yok
 import { useParams, Link, useLocation } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import ProductGrid from '../components/ProductGrid';
 import { useSelector, useDispatch } from 'react-redux';
-import { FETCH_STATES } from '../store/actions/productActions';
+import {
+  FETCH_STATES,
+  fetchProducts,
+  setSelectedCategoryId,
+  setSortOption,
+  setFilterText,
+  setCurrentPage, // Yeni action'ı import et
+} from '../store/actions/productActions';
+import { FaSpinner, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Sayfalama ikonları
 
 const ShopPage = () => {
-  const params = useParams();
-  const location = useLocation();
-  const { gender, categorySlug, categoryId } = params;
   const dispatch = useDispatch();
+  const location = useLocation();
+  const routeParams = useParams();
 
   const {
     productList,
@@ -17,80 +25,217 @@ const ShopPage = () => {
     productsFetchState,
     productsError,
     categories: allApiCategories,
+    selectedCategoryId: categoryIdFromStore,
+    sortOption: sortOptionFromStore,
+    filterText: filterTextFromStore,
+    limit,
+    currentPage, // <<<< BU SATIRIN OLDUĞUNDAN VE YAZIMININ DOĞRU OLDUĞUNDAN EMİN OL
   } = useSelector((state) => state.product);
 
-  let filteredProducts = [];
+  const [localFilterInput, setLocalFilterInput] = useState(filterTextFromStore || '');
+
+  // Debounce Effect (Aynı kalıyor)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localFilterInput !== filterTextFromStore) {
+        dispatch(setFilterText(localFilterInput));
+      }
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [localFilterInput, dispatch, filterTextFromStore]);
+
+  // Effect 1: URL'deki categoryId (Aynı kalıyor)
+  useEffect(() => {
+    if (routeParams.categoryId && routeParams.categoryId !== categoryIdFromStore) {
+      dispatch(setSelectedCategoryId(routeParams.categoryId));
+    } else if (!routeParams.categoryId && categoryIdFromStore) {
+      dispatch(setSelectedCategoryId(null));
+    }
+  }, [dispatch, routeParams.categoryId, categoryIdFromStore]);
+
+  // --- EFFECT 2: Filtreler (kategori, sıralama, filtre metni, limit) DEĞİŞTİĞİNDE ürünleri çek ---
+  // BU EFFECT ARTIK currentPage DEĞİŞTİĞİNDE ÇALIŞMAYACAK.
+  // Sayfa değişimi handlePageChange ile yönetilecek.
+  useEffect(() => {
+    const paramsForAPI = {
+      limit: limit,
+      offset: 0, // Filtreler değiştiğinde her zaman ilk sayfadan başla (currentPage: 1 olacak)
+    };
+    if (categoryIdFromStore) paramsForAPI.category = categoryIdFromStore;
+    if (sortOptionFromStore) paramsForAPI.sort = sortOptionFromStore;
+    if (filterTextFromStore) paramsForAPI.filter = filterTextFromStore;
+
+    // Bu effect sadece ana filtreler veya limit değiştiğinde çalışsın.
+    // currentPage değişimi için ayrı bir handlePageChange fonksiyonu var.
+    console.log('[ShopPage EFFECT2] Filters changed, fetching products from page 1. Params:', paramsForAPI);
+    dispatch(fetchProducts(paramsForAPI));
+
+  }, [dispatch, categoryIdFromStore, sortOptionFromStore, filterTextFromStore, limit]);
+  // Bağımlılıklardan currentPage çıkarıldı.
+
+  // Sıralama seçenekleri (Aynı kalıyor)
+  const sortOptions = [
+    { value: '', label: 'Default Sorting' },
+    { value: 'price:asc', label: 'Price: Low to High' },
+    { value: 'price:desc', label: 'Price: High to Low' },
+    { value: 'rating:asc', label: 'Rating: Low to High' },
+    { value: 'rating:desc', label: 'Rating: High to Low' },
+  ];
+
+  // UI Handler'ları (Aynı kalıyor)
+  const handleSortChange = (e) => dispatch(setSortOption(e.target.value));
+  const handleFilterInputChange = (e) => setLocalFilterInput(e.target.value);
+
+  // --- YENİ: SAYFALAMA İÇİN HESAPLAMALAR VE HANDLER ---
+  const totalPages = Math.ceil(totalProducts / limit);
+
+  const handlePageChange = (newPage) => {
+    console.log('[ShopPage] handlePageChange CALLED with newPage:', newPage, 'Current Page Before Dispatch:', currentPage, 'Total Pages:', totalPages);
+
+    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
+      console.log('[ShopPage] Conditions MET. Dispatching setCurrentPage and fetching products.');
+      dispatch(setCurrentPage(newPage));
+      const newOffset = (newPage - 1) * limit;
+      const paramsForAPI = {
+        limit,
+        offset: newOffset,
+      };
+      if (categoryIdFromStore) paramsForAPI.category = categoryIdFromStore;
+      if (sortOptionFromStore) paramsForAPI.sort = sortOptionFromStore;
+      if (filterTextFromStore) paramsForAPI.filter = filterTextFromStore;
+      
+      console.log(`[ShopPage] Page changed to ${newPage}. Fetching products with params:`, paramsForAPI);
+      dispatch(fetchProducts(paramsForAPI));
+
+      // YENİ EKLENEN SATIR: Sayfanın en üstüne kaydır
+      window.scrollTo(0, 0);
+
+    } else {
+      console.log('[ShopPage] Conditions NOT MET. newPage:', newPage, 'currentPage:', currentPage, 'totalPages:', totalPages);
+    }
+  };
+
+  // Sayfalama UI'ını render etmek için yardımcı fonksiyon (isteğe bağlı)
+  const renderPagination = () => {
+    if (totalPages <= 1) return null; // Tek sayfa varsa sayfalama gösterme
+
+    const pageNumbers = [];
+    // Basit bir sayfalama gösterimi, daha karmaşık (örn: "..." ile kısaltma) yapılabilir.
+    // Şimdilik maks 5 sayfa butonu gösterelim, aktif sayfa ortada olacak şekilde.
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    if (currentPage <= 3) { // Başa yakınsak
+        endPage = Math.min(totalPages, 5);
+    }
+    if (currentPage > totalPages - 3) { // Sona yakınsak
+        startPage = Math.max(1, totalPages - 4);
+    }
+
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <nav aria-label="Page navigation" className="flex justify-center mt-10 mb-6">
+        <ul className="inline-flex items-center -space-x-px">
+          <li>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <FaChevronLeft />
+            </button>
+          </li>
+          {startPage > 1 && ( // Başa "..." ve "1" ekle
+            <>
+              <li>
+                <button onClick={() => handlePageChange(1)} className={`px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700`}>1</button>
+              </li>
+              {startPage > 2 && <li className="px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300"><span>...</span></li>}
+            </>
+          )}
+          {pageNumbers.map(number => (
+            <li key={number}>
+              <button
+                onClick={() => handlePageChange(number)}
+                className={`px-3 h-8 leading-tight border border-gray-300 ${
+                  currentPage === number
+                    ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700'
+                    : 'text-gray-500 bg-white hover:bg-gray-100 hover:text-gray-700'
+                }`}
+              >
+                {number}
+              </button>
+            </li>
+          ))}
+           {endPage < totalPages && ( // Sona "..." ve son sayfa ekle
+            <>
+              {endPage < totalPages - 1 && <li className="px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300"><span>...</span></li>}
+              <li>
+                <button onClick={() => handlePageChange(totalPages)} className={`px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700`}>{totalPages}</button>
+              </li>
+            </>
+          )}
+          <li>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <FaChevronRight />
+            </button>
+          </li>
+        </ul>
+      </nav>
+    );
+  };
+
+
+  // Sayfa başlığı ve Breadcrumb (Aynı kalıyor)
   let pageTitle = 'Shop';
-  let breadcrumbSegments = [{ name: 'Shop', path: '/shop' }];
-
-  if (productsFetchState === FETCH_STATES.FETCHED && productList.length > 0) {
-    if (location.pathname === '/shop/home-living') {
-      pageTitle = 'Home & Living';
-      filteredProducts = productList.filter(
-        (product) => product.apiCategoryId === null
-      );
-      breadcrumbSegments.push({ name: pageTitle });
-    }
-    else if (categoryId && gender && gender !== 'static') {
-      filteredProducts = productList.filter(product => {
-        const categoryObj = allApiCategories.find(cat => cat.id === product.category_id);
-        return (
-          String(product.category_id) === String(categoryId) &&
-          categoryObj &&
-          categoryObj.gender === gender
-        );
-      });
-      breadcrumbSegments.push({ name: pageTitle });
-    }
-    else if (gender && gender !== 'static' && !categoryId) {
-      filteredProducts = productList.filter(product => {
-        const categoryObj = allApiCategories.find(cat => cat.id === product.category_id);
-        return categoryObj && categoryObj.gender === gender;
-      });
-      breadcrumbSegments.push({ name: pageTitle });
-    }
-    else if (location.pathname === '/shop') {
-      pageTitle = 'All Products';
-      filteredProducts = productList;
-    }
-    else {
-      console.warn(`[ShopPage] Fallback: No specific category route matched. Path: ${location.pathname}. Params:`, params);
-      pageTitle = 'All Products';
-      filteredProducts = productList;
+  const breadcrumbSegments = [{ name: 'Home', path: '/' }]; 
+  if (location.pathname === '/shop' && !categoryIdFromStore && !filterTextFromStore) {
+    pageTitle = 'All Products';
+    breadcrumbSegments.push({ name: 'Shop', path: '/shop' });
+  } else {
+    breadcrumbSegments.push({ name: 'Shop', path: '/shop' }); 
+    if (categoryIdFromStore) {
+      const currentCategory = allApiCategories.find(cat => String(cat.id) === String(categoryIdFromStore));
+      if (currentCategory) {
+        pageTitle = currentCategory.title;
+        if (routeParams.gender && routeParams.categorySlug) {
+            const genderTitle = routeParams.gender.charAt(0).toUpperCase() + routeParams.gender.slice(1);
+        }
+        breadcrumbSegments.push({ name: currentCategory.title }); 
+      } else {
+        pageTitle = "Filtered Products"; 
+      }
+    } else if (filterTextFromStore) {
+      pageTitle = `Search results for "${filterTextFromStore}"`;
+    } else {
+      pageTitle = "Products"; 
     }
   }
 
-  if (productsFetchState === FETCH_STATES.FETCHING) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-6 py-10 text-center">
-          <p className="text-xl text-gray-700">Loading products...</p>
-        </div>
-      </MainLayout>
-    );
-  }
+  // Sonuç sayısı gösterimi (Aynı kalıyor)
+  const resultsText = totalProducts > 0 
+    ? `Showing ${productList.length} of ${totalProducts} results (Page ${currentPage} of ${totalPages})` 
+    : `Showing ${productList.length} results`;
 
-  if (productsFetchState === FETCH_STATES.FAILED) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-6 py-10 text-center">
-          <p className="text-xl text-red-600">Error loading products:</p>
-          <p className="text-md text-gray-700">{productsError || 'An unknown error occurred.'}</p>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
-      <section className="bg-lighter-bg py-6">
-        <div className="container mx-auto px-6 flex items-center text-sm">
-          <Link to="/" className="text-dark-text font-bold hover:text-primary">Home</Link>
+      {/* Breadcrumb (Aynı kalıyor) */}
+      <section className="bg-lighter-bg py-6 mt-[90px]">
+         <div className="container mx-auto px-6 flex items-center text-sm">
           {breadcrumbSegments.map((segment, index) => (
             <React.Fragment key={index}>
-              <span className="text-muted-text mx-2">{'>'}</span>
-              {segment.path ? (
-                <Link to={segment.path} className="text-muted-text hover:text-primary">
+              {index > 0 && <span className="text-muted-text mx-2">{'>'}</span>}
+              {segment.path && index < breadcrumbSegments.length -1 ? ( 
+                <Link to={segment.path} className="text-dark-text hover:text-primary">
                   {segment.name}
                 </Link>
               ) : (
@@ -101,75 +246,66 @@ const ShopPage = () => {
         </div>
       </section>
 
-      <section className="bg-white py-4 border-b border-gray-200 mt-[90px]">
-        <div className="container mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      {/* Filtreleme ve Sıralama UI (Aynı kalıyor) */}
+      <section className="bg-white py-4 border-b border-gray-200">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+            <div className="w-full md:w-1/3">
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                value={localFilterInput} 
+                onChange={handleFilterInputChange} 
+              />
+            </div>
+            <div className="w-full md:w-auto">
+              <select
+                className="w-full md:w-auto p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary bg-white text-gray-700"
+                value={sortOptionFromStore}
+                onChange={handleSortChange}
+              >
+                {sortOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="text-second-text text-sm font-bold">
-            Showing {filteredProducts.length} results{pageTitle !== 'All Products' && pageTitle !== 'Shop' ? ` for ${pageTitle}` : ''}
+            {resultsText} {/* Sonuç metnine sayfa bilgisi eklendi */}
           </div>
         </div>
       </section>
 
+      {/* Ürün Grid'i (Aynı kalıyor) */}
       <div className="container mx-auto px-6 py-10">
-        {productsFetchState === FETCH_STATES.FETCHED && filteredProducts.length === 0 && productList.length > 0 && (
+         {productsFetchState === FETCH_STATES.FETCHED && productList.length === 0 && totalProducts > 0 && ( 
           <div className="text-center py-10">
             <p className="text-xl text-gray-700">No products found matching your criteria.</p>
           </div>
         )}
-        {productsFetchState === FETCH_STATES.FETCHED && productList.length === 0 && (
+        {productsFetchState === FETCH_STATES.FETCHED && totalProducts === 0 && ( 
           <div className="text-center py-10">
             <p className="text-xl text-gray-700">No products available at the moment.</p>
             <p className="text-md text-gray-500">Please check back later.</p>
           </div>
         )}
-        {filteredProducts.length > 0 && (
+        {productList.length > 0 && (
           <ProductGrid
-            title={pageTitle !== 'All Products' && pageTitle !== 'Shop' ? pageTitle : ''}
-            products={filteredProducts}
+            title={pageTitle !== 'All Products' && pageTitle !== 'Shop' && !categoryIdFromStore ? pageTitle : ''} 
+            products={productList} 
           />
         )}
       </div>
+
+
+      {/* YENİ: SAYFALAMA UI RENDER */}
+      {renderPagination()}
+
     </MainLayout>
   );
 };
 
 export default ShopPage;
-
-// Önemli Not: ProductGrid bileşeninin (src/components/ProductGrid.jsx)
-// dışarıdan bir 'products' prop'u alacak şekilde güncellenmesi gerekebilir.
-// Eğer şu an sadece kendi içindeki getProductsData'yı kullanıyorsa,
-// prop olarak gelen ürünleri de işleyebilmesi için düzenlenmelidir.
-// Şimdilik getProductsData'yı import edip filtrelemeyi ShopPage'de yaptık.
-// Eğer ProductGrid'i direkt products prop'u ile kullanacaksak, ProductGrid'i de güncelleyelim.
-
-// ProductGrid'in güncellenmiş hali şöyle olabilir:
-/*
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { getProductsData as fetchAllProducts } from './ProductGrid'; // Veri alma fonksiyonunu farklı isimle import et
-
-const ProductCard = ({ product }) => {
-  // ... (ProductCard aynı kalabilir)
-};
-
-// Ürün verisini dışarı export et
-export const getProductsData = fetchAllProducts;
-
-const ProductGrid = ({ title, products }) => { // 'products' prop'unu ekledik
-  // Eğer products prop'u gelmediyse, tüm ürünleri fetch et (opsiyonel fallback)
-  const productsToDisplay = products || fetchAllProducts();
-
-  return (
-    <section className="container mx-auto px-6 py-10">
-      {title && <h2 className="text-2xl font-bold text-dark-text text-center mb-8">{title}</h2>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {productsToDisplay.map((product) => (
-          <ProductCard key={product.productId} product={product} />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-export default ProductGrid;
-*/
-// Şimdilik ProductGrid'i değiştirmeden, ShopPage'de filtreleme yapıyoruz. 

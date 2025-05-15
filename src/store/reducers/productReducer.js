@@ -1,3 +1,4 @@
+// src/store/reducers/productReducer.js
 import {
   FETCH_STATES,
   SET_CATEGORIES_REQUEST,
@@ -9,35 +10,42 @@ import {
   SET_FETCH_STATE,
   SET_LIMIT,
   SET_OFFSET,
-  SET_FILTER,
+  // SET_FILTER, // <<< BU SATIRIN OLMADIĞINDAN EMİN OLUN
+  // T14 için Action Tipleri
+  SET_SELECTED_CATEGORY_ID,
+  SET_SORT_OPTION,
+  SET_FILTER_TEXT,
+  CLEAR_ALL_FILTERS, // Opsiyonel
+  SET_CURRENT_PAGE, // <<<< BU IMPORT'UN OLDUĞUNDAN EMİN OL (productActions.js'de export edilmişti)
 } from '../actions/productActions';
 
-// Başlangıç Durumu (Initial State)
 const initialState = {
-  categories: [], // Kategori listesi
-  categoriesFetchState: FETCH_STATES.NOT_FETCHED, // Kategoriler için yüklenme durumu - YENİ
-  categoriesError: null, // Kategori çekme hatası - YENİ
-  productList: [], // Ürün listesi
-  totalProducts: 0, // Toplam ürün sayısı
-  productsFetchState: FETCH_STATES.NOT_FETCHED, // Ürünler için yüklenme durumu
-  productsError: null, // Ürün çekme hatası
-  fetchState: FETCH_STATES.NOT_FETCHED, // Başlangıç yüklenme durumu
-  limit: 25, // Sayfa başına ürün sayısı
-  offset: 0, // Sayfalama başlangıç noktası
-  filter: '', // Filtre metni
+  categories: [],
+  categoriesFetchState: FETCH_STATES.NOT_FETCHED,
+  categoriesError: null,
+  productList: [],
+  totalProducts: 0,
+  productsFetchState: FETCH_STATES.NOT_FETCHED,
+  productsError: null,
+  fetchState: FETCH_STATES.NOT_FETCHED,
+  limit: 25,
+  offset: 0,
+  currentPage: 1,
+  selectedCategoryId: null,
+  sortOption: '',
+  filterText: '',
+  // filter: '', // <<< ESKİ 'filter' STATE'İNİN DE OLMADIĞINDAN EMİN OLUN (isteğe bağlı ama önerilir)
 };
 
-// Product Reducer Fonksiyonu
 const productReducer = (state = initialState, action) => {
   switch (action.type) {
-    // Kategori Action'ları - YENİ / GÜNCELLENDİ
     case SET_CATEGORIES_REQUEST:
       return {
         ...state,
         categoriesFetchState: FETCH_STATES.FETCHING,
-        categoriesError: null, // Önceki hatayı temizle
+        categoriesError: null,
       };
-    case SET_CATEGORIES_SUCCESS: // Eski SET_CATEGORIES yerine
+    case SET_CATEGORIES_SUCCESS:
       return {
         ...state,
         categories: action.payload,
@@ -49,19 +57,17 @@ const productReducer = (state = initialState, action) => {
         categoriesFetchState: FETCH_STATES.FAILED,
         categoriesError: action.payload,
       };
-
-    // --- YENİ ÜRÜN ACTION'LARI ---
     case SET_PRODUCTS_REQUEST:
       return {
         ...state,
         productsFetchState: FETCH_STATES.FETCHING,
-        productsError: null, // Önceki hatayı temizle
+        productsError: null,
       };
     case SET_PRODUCTS_SUCCESS:
       return {
         ...state,
-        productList: action.payload.products, // Payload'dan ürünleri al
-        totalProducts: action.payload.total,   // Payload'dan toplam sayıyı al
+        productList: action.payload.products,
+        totalProducts: action.payload.total,
         productsFetchState: FETCH_STATES.FETCHED,
       };
     case SET_PRODUCTS_FAILURE:
@@ -70,16 +76,32 @@ const productReducer = (state = initialState, action) => {
         productsFetchState: FETCH_STATES.FAILED,
         productsError: action.payload,
       };
-    // -----------------------------
-
-    // Eski Product Action'ları (SET_PRODUCT_LIST ve SET_TOTAL kaldırıldı)
-    // case SET_PRODUCT_LIST:
-    //   return { ...state, productList: action.payload };
-    // case SET_TOTAL:
-    //   return { ...state, total: action.payload }; // totalProducts olarak değişti
-
-    // Bu genel fetchState, eğer sadece ürünlerle ilgiliyse `productsFetchState` ile birleştirilebilir.
-    // Şimdilik ayrı tutuyorum.
+    case SET_SELECTED_CATEGORY_ID:
+      return {
+        ...state,
+        selectedCategoryId: action.payload,
+        offset: 0, // Kategori değişince başa dön
+      };
+    case SET_SORT_OPTION:
+      return {
+        ...state,
+        sortOption: action.payload,
+        offset: 0, // Sıralama değişince başa dön
+      };
+    case SET_FILTER_TEXT:
+      return {
+        ...state,
+        filterText: action.payload,
+        offset: 0, // Filtre değişince başa dön
+      };
+    case CLEAR_ALL_FILTERS:
+      return {
+        ...state,
+        selectedCategoryId: null,
+        sortOption: '',
+        filterText: '',
+        offset: 0,
+      };
     case SET_FETCH_STATE:
       if (Object.values(FETCH_STATES).includes(action.payload)) {
         return { ...state, fetchState: action.payload };
@@ -89,11 +111,25 @@ const productReducer = (state = initialState, action) => {
       return { ...state, limit: action.payload };
     case SET_OFFSET:
       return { ...state, offset: action.payload };
-    case SET_FILTER:
-      return { ...state, filter: action.payload };
+    
+    // case SET_FILTER: // <<< BU CASE BLOĞUNUN TAMAMEN KALDIRILDIĞINDAN EMİN OLUN
+    //   return { ...state, filter: action.payload };
+
+    case SET_CURRENT_PAGE: // <<<< YENİ EKLE
+      return {
+        ...state,
+        currentPage: action.payload,
+        // Not: Offset burada güncellenmiyor, çünkü fetchProducts
+        // çağrılmadan önce ShopPage'deki handlePageChange içinde
+        // yeni offset hesaplanıp doğrudan fetchProducts'a veriliyor.
+        // Eğer istersen, currentPage değiştiğinde offset'i de burada
+        // (state.limit * (action.payload - 1)) olarak ayarlayabilirsin,
+        // ama mevcut ShopPage mantığına göre bu gerekli değil.
+      };
+
     default:
       return state;
   }
 };
 
-export default productReducer; 
+export default productReducer;
