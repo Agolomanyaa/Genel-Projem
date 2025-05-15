@@ -295,7 +295,8 @@ const ShopPage = () => {
         {productList.length > 0 && (
           <ProductGrid
             title={pageTitle !== 'All Products' && pageTitle !== 'Shop' && !categoryIdFromStore ? pageTitle : ''} 
-            products={productList} 
+            products={productList}
+            categories={allApiCategories}
           />
         )}
       </div>

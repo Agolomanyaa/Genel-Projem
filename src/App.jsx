@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     dispatch(verifyToken());
     dispatch(fetchCategories());
-    dispatch(fetchProducts());
+    // dispatch(fetchProducts()); // App.js'de genel ürün çekme yerine ShopPage'de çekiliyor
   }, [dispatch]);
 
   return (
@@ -28,25 +28,24 @@ function App() {
       <ScrollToTop />
       <Switch>
         <Route path="/" exact component={HomePage} />
-        <Route path="/product/:productId" component={ProductDetailPage} />
+        {/* T16 İÇİN YENİ ÜRÜN DETAY ROTASI */}
+        <Route 
+          path="/shop/:gender/:categorySlug/:categoryId/:productNameSlug/:productId" 
+          component={ProductDetailPage} 
+        />
+        {/* Mevcut basit ürün detay rotası (belki ileride kaldırılabilir veya yönlendirme yapılabilir) */}
+        <Route path="/product/:productId" component={ProductDetailPage} /> 
+        
         <Route path="/contact" component={ContactPage} />
         <Route path="/team" component={TeamPage} />
         <Route path="/about" component={AboutUsPage} />
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
 
-        {/* SHOP ROTASLARI - YENİ SIRALAMA VE ROTA */}
-        {/* 1. En spesifik: "Home & Living" için özel yol */}
+        {/* SHOP ROTASLARI */}
         <Route path="/shop/home-living" component={ShopPage} />
-
-        {/* 2. API Kategorileri (üç parametreli) */}
         <Route path="/shop/:gender/:categorySlug/:categoryId" component={ShopPage} />
-
-        {/* 3. YENİ: Sadece Cinsiyet (iki parametreli, :gender 'k' veya 'e' olacak) */}
-        {/*    Bu, /shop/home-living ve /shop/:g/:c/:id ile eşleşmeyenleri yakalar */}
         <Route path="/shop/:gender" component={ShopPage} />
-
-        {/* 4. En genel: Sadece /shop (Tüm Ürünler) */}
         <Route path="/shop" exact component={ShopPage} />
 
         <ProtectedRoute path="/checkout" component={() => <div>Checkout Page (Protected)</div>} />

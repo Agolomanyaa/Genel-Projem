@@ -31,6 +31,12 @@ export const CLEAR_ALL_FILTERS = 'CLEAR_ALL_FILTERS';     // Opsiyonel
 // T15 (Sayfalama) İÇİN YENİ ACTION TYPE
 export const SET_CURRENT_PAGE = 'SET_CURRENT_PAGE'; // <<<< YENİ EKLE
 
+// YENİ: Tek Ürün Detayı için Action Tipleri
+export const FETCH_PRODUCT_BY_ID_REQUEST = 'FETCH_PRODUCT_BY_ID_REQUEST';
+export const FETCH_PRODUCT_BY_ID_SUCCESS = 'FETCH_PRODUCT_BY_ID_SUCCESS';
+export const FETCH_PRODUCT_BY_ID_FAILURE = 'FETCH_PRODUCT_BY_ID_FAILURE';
+export const CLEAR_SELECTED_PRODUCT = 'CLEAR_SELECTED_PRODUCT'; // Sayfadan çıkıldığında temizlemek için
+
 // Action Creator Fonksiyonları
 export const setCategoriesRequest = () => ({ type: SET_CATEGORIES_REQUEST });
 export const setCategoriesSuccess = (categories) => ({ type: SET_CATEGORIES_SUCCESS, payload: categories });
@@ -147,6 +153,39 @@ export const setCurrentPage = (page) => ({ // <<<< YENİ EKLE
   type: SET_CURRENT_PAGE,
   payload: page,
 });
+
+// YENİ: Tek Ürün Detayı için Action Creator'lar
+export const fetchProductByIdRequest = () => ({ type: FETCH_PRODUCT_BY_ID_REQUEST });
+export const fetchProductByIdSuccess = (product) => ({ type: FETCH_PRODUCT_BY_ID_SUCCESS, payload: product });
+export const fetchProductByIdFailure = (error) => ({ type: FETCH_PRODUCT_BY_ID_FAILURE, payload: error });
+export const clearSelectedProduct = () => ({ type: CLEAR_SELECTED_PRODUCT });
+
+// YENİ: ID ile Tek Ürün Çekmek İçin Thunk Action
+export const fetchProductById = (productId) => async (dispatch) => {
+  dispatch(fetchProductByIdRequest());
+  console.log(`[fetchProductById] Request dispatched for productId: ${productId}`);
+  try {
+    // API endpoint'i: /products/:productId
+    const response = await axiosInstance.get(`/products/${productId}`);
+    console.log('[fetchProductById] Response received:', response);
+    if (response && response.status === 200 && response.data) {
+      // API'den dönen product objesinin görevdeki gibi olduğunu varsayıyoruz
+      // (id, name, description, price, images, category_id vb.)
+      dispatch(fetchProductByIdSuccess(response.data));
+      console.log('[fetchProductById] fetchProductByIdSuccess dispatched with product:', response.data);
+    } else {
+      console.error('[fetchProductById] ERROR: Unexpected response structure or status!', response);
+      dispatch(fetchProductByIdFailure("Unexpected response structure or status while fetching product by ID."));
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || `Failed to fetch product with ID ${productId}. Please try again later.`;
+    console.error(`[fetchProductById] CATCH BLOCK ERROR for productId ${productId}:`, errorMessage, "Full error object:", error);
+    dispatch(fetchProductByIdFailure(errorMessage));
+    // Postman'de 500 hatası alıyorduk, API bu endpoint için sorunlu olabilir.
+    // Eğer API /products/:id yerine /product/:id gibi bir şey bekliyorsa, burayı düzeltmek gerekebilir.
+    // Şimdilik görevdeki /products/:productId varsayımıyla devam ediyoruz.
+  }
+};
 
 // NOT: Eski genel bir 'SET_FILTER' action type ve 'filter' state'i vardı.
 // T14 ile 'SET_FILTER_TEXT' ve 'filterText' state'ini daha spesifik olarak ekledik.

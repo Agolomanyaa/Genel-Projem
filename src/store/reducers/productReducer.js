@@ -17,6 +17,10 @@ import {
   SET_FILTER_TEXT,
   CLEAR_ALL_FILTERS, // Opsiyonel
   SET_CURRENT_PAGE, // <<<< BU IMPORT'UN OLDUĞUNDAN EMİN OL (productActions.js'de export edilmişti)
+  FETCH_PRODUCT_BY_ID_REQUEST,
+  FETCH_PRODUCT_BY_ID_SUCCESS,
+  FETCH_PRODUCT_BY_ID_FAILURE,
+  CLEAR_SELECTED_PRODUCT,
 } from '../actions/productActions';
 
 const initialState = {
@@ -35,6 +39,9 @@ const initialState = {
   sortOption: '',
   filterText: '',
   // filter: '', // <<< ESKİ 'filter' STATE'İNİN DE OLMADIĞINDAN EMİN OLUN (isteğe bağlı ama önerilir)
+  selectedProduct: null,
+  selectedProductFetchState: FETCH_STATES.NOT_FETCHED,
+  selectedProductError: null,
 };
 
 const productReducer = (state = initialState, action) => {
@@ -125,6 +132,32 @@ const productReducer = (state = initialState, action) => {
         // Eğer istersen, currentPage değiştiğinde offset'i de burada
         // (state.limit * (action.payload - 1)) olarak ayarlayabilirsin,
         // ama mevcut ShopPage mantığına göre bu gerekli değil.
+      };
+
+    case FETCH_PRODUCT_BY_ID_REQUEST:
+      return {
+        ...state,
+        selectedProductFetchState: FETCH_STATES.FETCHING,
+        selectedProductError: null,
+      };
+    case FETCH_PRODUCT_BY_ID_SUCCESS:
+      return {
+        ...state,
+        selectedProductFetchState: FETCH_STATES.FETCHED,
+        selectedProduct: action.payload,
+      };
+    case FETCH_PRODUCT_BY_ID_FAILURE:
+      return {
+        ...state,
+        selectedProductFetchState: FETCH_STATES.FAILED,
+        selectedProductError: action.payload,
+      };
+    case CLEAR_SELECTED_PRODUCT:
+      return {
+        ...state,
+        selectedProduct: null,
+        selectedProductFetchState: FETCH_STATES.NOT_FETCHED,
+        selectedProductError: null,
       };
 
     default:
