@@ -3,6 +3,7 @@ import {
   REMOVE_FROM_CART,
   UPDATE_CART_ITEM_COUNT,
   CLEAR_CART,
+  TOGGLE_PRODUCT_CHECKED,
   // TOGGLE_CART_ITEM_CHECKED, // Şimdilik kullanmıyoruz
 } from '../actions/shoppingCartActions';
 
@@ -70,6 +71,14 @@ const shoppingCartReducer = (state = initialState, action) => {
         ...state,
         cart: [], // Sepeti boşalt
       };
+
+    case TOGGLE_PRODUCT_CHECKED: {
+      const { productId } = action.payload;
+      const updatedCart = state.cart.map((item) =>
+        item.product.id === productId ? { ...item, checked: !item.checked } : item
+      );
+      return { ...state, cart: updatedCart };
+    }
 
     // case TOGGLE_CART_ITEM_CHECKED: {
     //   const { productId } = action.payload;

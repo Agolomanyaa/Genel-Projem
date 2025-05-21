@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { removeFromCart, updateCartItemCount } from '../store/actions/shoppingCartActions';
+import { removeFromCart, updateCartItemCount, toggleProductChecked } from '../store/actions/shoppingCartActions';
 import { FaTrashAlt, FaPlus, FaMinus } from 'react-icons/fa';
 
 const CartDropdown = ({ isOpen, toggleDropdown }) => {
@@ -56,7 +56,7 @@ const CartDropdown = ({ isOpen, toggleDropdown }) => {
                   />
                   <div>
                     <Link 
-                      to={`/shop/product/${item.product.id}`} 
+                      to={`/product/${item.product.id}`}
                       onClick={toggleDropdown}
                       className="text-sm font-medium text-gray-800 hover:text-primary block"
                     >

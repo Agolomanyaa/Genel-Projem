@@ -6,6 +6,7 @@ export const ADD_TO_CART = 'ADD_TO_CART';
 export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 export const UPDATE_CART_ITEM_COUNT = 'UPDATE_CART_ITEM_COUNT';
 export const CLEAR_CART = 'CLEAR_CART'; // Tüm sepeti temizlemek için opsiyonel
+export const TOGGLE_PRODUCT_CHECKED = 'TOGGLE_PRODUCT_CHECKED'; // Bu satırın olduğundan emin olalım
 // export const TOGGLE_CART_ITEM_CHECKED = 'TOGGLE_CART_ITEM_CHECKED'; // Şimdilik kullanmayabiliriz
 
 // Action Creator Fonksiyonları
@@ -58,6 +59,15 @@ export const updateCartItemCount = (productId, count) => ({
  */
 export const clearCart = () => ({
   type: CLEAR_CART,
+});
+
+/**
+ * Sepetteki bir ürünün "checked" durumunu (seçili/seçili değil) değiştirir.
+ * @param {string|number} productId - Durumu değiştirilecek ürünün ID'si
+ */
+export const toggleProductChecked = (productId) => ({ // Bu fonksiyonun export edildiğinden emin olalım
+  type: TOGGLE_PRODUCT_CHECKED,
+  payload: { productId },
 });
 
 // Opsiyonel: Ürünün işaretli olup olmadığını değiştirmek için (checkout'ta kullanılabilir)
