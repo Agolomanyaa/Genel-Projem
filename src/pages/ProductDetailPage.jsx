@@ -14,6 +14,7 @@ import {
   fetchProductById, 
   clearSelectedProduct,
 } from '../store/actions/productActions';
+import { addToCart } from '../store/actions/shoppingCartActions';
 import { FETCH_STATES } from '../store/actions/productActions';
 
 const ProductDetailPage = () => {
@@ -42,8 +43,38 @@ const ProductDetailPage = () => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxInitialSlide, setLightboxInitialSlide] = useState(0);
 
+  const [quantity, setQuantity] = useState(1);
+
   const handleGoBack = () => {
     history.goBack();
+  };
+
+  const handleAddToCart = () => {
+    if (selectedProduct && selectedProduct.stock > 0) {
+      const productToAdd = {
+        id: selectedProduct.id,
+        name: selectedProduct.name,
+        price: selectedProduct.price,
+        imageUrl: (selectedProduct.images && selectedProduct.images.length > 0) 
+                    ? selectedProduct.images[0].url 
+                    : 'https://via.placeholder.com/100',
+        stock: selectedProduct.stock,
+      };
+
+      dispatch(addToCart(productToAdd, quantity));
+      console.log(`[ProductDetailPage] Added to cart: ${quantity} x ${selectedProduct.name}`);
+    } else {
+      console.warn('[ProductDetailPage] Cannot add to cart: Product not loaded or out of stock.');
+    }
+  };
+
+  const handleQuantityChange = (amount) => {
+    setQuantity(prevQuantity => {
+      const newQuantity = prevQuantity + amount;
+      if (newQuantity < 1) return 1;
+      if (selectedProduct && newQuantity > selectedProduct.stock) return selectedProduct.stock;
+      return newQuantity;
+    });
   };
 
   if (selectedProductFetchState === FETCH_STATES.FETCHING) {
@@ -183,12 +214,41 @@ const ProductDetailPage = () => {
             
             <hr className="mb-6"/>
 
+            <div className="mb-6">
+              <label htmlFor="quantity" className="block text-sm font-bold text-dark-text mb-2">Quantity:</label>
+              <div className="flex items-center">
+                <button 
+                  onClick={() => handleQuantityChange(-1)} 
+                  className="px-3 py-1 border border-gray-300 rounded-l hover:bg-gray-100"
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
+                <input 
+                  type="number" 
+                  id="quantity" 
+                  value={quantity} 
+                  readOnly
+                  className="w-12 text-center border-t border-b border-gray-300 py-1"
+                />
+                <button 
+                  onClick={() => handleQuantityChange(1)} 
+                  className="px-3 py-1 border border-gray-300 rounded-r hover:bg-gray-100"
+                  disabled={selectedProduct && quantity >= selectedProduct.stock}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 mt-8">
               <button
-                className="bg-primary text-white font-bold py-3 px-8 rounded hover:bg-primary-dark transition-colors"
-                disabled={stock === 0}
+                onClick={handleAddToCart}
+                className={`bg-primary text-white font-bold py-3 px-8 rounded hover:bg-primary-dark transition-colors
+                            ${(selectedProduct && selectedProduct.stock === 0) || selectedProductFetchState === FETCH_STATES.FETCHING ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={(selectedProduct && selectedProduct.stock === 0) || selectedProductFetchState === FETCH_STATES.FETCHING}
               >
-                {stock > 0 ? 'Add to Cart' : 'Notify Me'}
+                {selectedProduct && selectedProduct.stock > 0 ? 'Add to Cart' : (selectedProductFetchState === FETCH_STATES.FETCHING ? 'Loading...' : 'Out of Stock')}
               </button>
             </div>
 

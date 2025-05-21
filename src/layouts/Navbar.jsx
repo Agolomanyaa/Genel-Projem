@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import md5 from 'blueimp-md5';
 import { FETCH_STATES } from '../store/actions/productActions';
+import CartDropdown from '../components/CartDropdown';
 
 const createCategorySlug = (title) => {
   if (!title) return '';
@@ -20,14 +21,21 @@ const createCategorySlug = (title) => {
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const dispatch = useDispatch();
-
+  
   const user = useSelector((state) => state.client.user);
   const {
     categories: apiCategories,
     categoriesFetchState,
     categoriesError
   } = useSelector((state) => state.product);
+  
+  const { cart } = useSelector((state) => state.shoppingCart);
+
+  const totalCartItems = useMemo(() => {
+    return cart.reduce((total, item) => total + item.count, 0);
+  }, [cart]);
 
   const groupedCategories = useMemo(() => {
     if (categoriesFetchState === FETCH_STATES.FETCHED && apiCategories.length > 0) {
@@ -67,6 +75,47 @@ const Navbar = () => {
       </Link>
     ));
   };
+
+  const toggleCartDropdown = () => {
+    setIsCartOpen(prev => !prev);
+  };
+
+  const cartDropdownContainerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // 1. Eğer dropdown referansı YOKSA veya tıklanan yer dropdown'ın İÇİNDEYSE, HİÇBİR ŞEY YAPMA.
+      if (!cartDropdownContainerRef.current || cartDropdownContainerRef.current.contains(event.target)) {
+        return;
+      }
+
+      // 2. Tıklanan yer sepet ikonuysa (masaüstü VEYA mobil), HİÇBİR ŞEY YAPMA.
+      const desktopCartIcon = document.getElementById('cart-icon-button');
+      const mobileCartIcon = document.getElementById('cart-icon-button-mobile');
+
+      if (
+        (desktopCartIcon && desktopCartIcon.contains(event.target)) ||
+        (mobileCartIcon && mobileCartIcon.contains(event.target))
+      ) {
+        return;
+      }
+      
+      // 3. Yukarıdaki durumlar değilse VE dropdown açıksa, dropdown'ı KAPAT.
+      if (isCartOpen) {
+        setIsCartOpen(false);
+      }
+    };
+
+    if (isCartOpen) {
+      document.addEventListener('click', handleClickOutside); // 'mousedown' yerine 'click'
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isCartOpen]);
 
   return (
     <nav className="bg-slate-800 font-sans fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-700">
@@ -127,9 +176,24 @@ const Navbar = () => {
             </Link>
           )}
           <button className="p-2 hover:text-white" aria-label="Search">🔍</button>
-          <Link to="/cart" className="flex items-center gap-1 p-2 hover:text-white" aria-label="Cart">
-            🛒 <span className="text-xs text-white">1</span>
-          </Link>
+          <div className="relative">
+            <button 
+              id="cart-icon-button"
+              onClick={toggleCartDropdown} 
+              className="flex items-center gap-1 p-2 hover:text-white" 
+              aria-label="Cart"
+            >
+              🛒 
+              {totalCartItems > 0 && (
+                <span className="text-xs bg-primary text-white rounded-full px-1.5 py-0.5 leading-none">
+                  {totalCartItems}
+                </span>
+              )}
+            </button>
+            <div ref={cartDropdownContainerRef}> 
+              <CartDropdown isOpen={isCartOpen} toggleDropdown={toggleCartDropdown} />
+            </div>
+          </div>
           <Link to="/wishlist" className="flex items-center gap-1 p-2 hover:text-white" aria-label="Wishlist">
             ❤️ <span className="text-xs text-white">1</span>
           </Link>
@@ -137,9 +201,24 @@ const Navbar = () => {
 
         <div className="flex lg:hidden items-center gap-x-5 text-white">
            <button className="p-1" aria-label="Search">🔍</button>
-           <Link to="/cart" className="p-1 flex items-center" aria-label="Cart">
-               🛒
-           </Link>
+           <div className="relative">
+             <button 
+               id="cart-icon-button-mobile"
+               onClick={toggleCartDropdown} 
+               className="p-1 flex items-center" 
+               aria-label="Cart"
+              >
+                 🛒
+                 {totalCartItems > 0 && (
+                   <span className="ml-1 text-xs bg-primary text-white rounded-full px-1 py-0.5 leading-none">
+                     {totalCartItems}
+                   </span>
+                 )}
+             </button>
+             <div ref={cartDropdownContainerRef}>
+                <CartDropdown isOpen={isCartOpen} toggleDropdown={toggleCartDropdown} />
+             </div>
+           </div>
            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-1" aria-label="Toggle Menu">
              {isMobileMenuOpen ? '✕' : '☰'}
            </button>
