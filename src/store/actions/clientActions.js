@@ -14,6 +14,25 @@ export const FETCH_ROLES_FAILURE = 'FETCH_ROLES_FAILURE';
 export const LOGIN_USER_START = 'LOGIN_USER_START';
 export const LOGIN_USER_SUCCESS = 'LOGIN_USER_SUCCESS';
 export const LOGIN_USER_FAILURE = 'LOGIN_USER_FAILURE';
+// Adresleri çekmek için Action Tipleri
+export const GET_ADDRESSES_REQUEST = 'GET_ADDRESSES_REQUEST';
+export const GET_ADDRESSES_SUCCESS = 'GET_ADDRESSES_SUCCESS';
+export const GET_ADDRESSES_FAILURE = 'GET_ADDRESSES_FAILURE';
+// Yeni adres eklemek için Action Tipleri
+export const ADD_ADDRESS_REQUEST = 'ADD_ADDRESS_REQUEST';
+export const ADD_ADDRESS_SUCCESS = 'ADD_ADDRESS_SUCCESS';
+export const ADD_ADDRESS_FAILURE = 'ADD_ADDRESS_FAILURE';
+// Adres güncellemek için Action Tipleri
+export const UPDATE_ADDRESS_REQUEST = 'UPDATE_ADDRESS_REQUEST';
+export const UPDATE_ADDRESS_SUCCESS = 'UPDATE_ADDRESS_SUCCESS';
+export const UPDATE_ADDRESS_FAILURE = 'UPDATE_ADDRESS_FAILURE';
+// YENİ: Adres silmek için Action Tipleri
+export const DELETE_ADDRESS_REQUEST = 'DELETE_ADDRESS_REQUEST';
+export const DELETE_ADDRESS_SUCCESS = 'DELETE_ADDRESS_SUCCESS';
+export const DELETE_ADDRESS_FAILURE = 'DELETE_ADDRESS_FAILURE';
+export const AUTH_VERIFY_PENDING = 'AUTH_VERIFY_PENDING';
+export const AUTH_VERIFY_SUCCESS = 'AUTH_VERIFY_SUCCESS';
+export const AUTH_VERIFY_FAILURE = 'AUTH_VERIFY_FAILURE';
 
 // Action Creator Fonksiyonları
 export const setUser = (userData) => ({
@@ -40,6 +59,26 @@ export const setLanguage = (languageCode) => ({
 export const loginUserStart = () => ({ type: LOGIN_USER_START });
 export const loginUserSuccess = (userData) => ({ type: LOGIN_USER_SUCCESS, payload: userData }); // SET_USER yerine bunu kullanabiliriz
 export const loginUserFailure = (error) => ({ type: LOGIN_USER_FAILURE, payload: error });
+
+// Adresleri çekmek için Action Creator'lar
+export const getAddressesRequest = () => ({ type: GET_ADDRESSES_REQUEST });
+export const getAddressesSuccess = (addresses) => ({ type: GET_ADDRESSES_SUCCESS, payload: addresses });
+export const getAddressesFailure = (error) => ({ type: GET_ADDRESSES_FAILURE, payload: error });
+
+// Yeni adres eklemek için Action Creator'lar
+export const addAddressRequest = () => ({ type: ADD_ADDRESS_REQUEST });
+export const addAddressSuccess = (newAddress) => ({ type: ADD_ADDRESS_SUCCESS, payload: newAddress });
+export const addAddressFailure = (error) => ({ type: ADD_ADDRESS_FAILURE, payload: error });
+
+// Adres güncellemek için Action Creator'lar
+export const updateAddressRequest = () => ({ type: UPDATE_ADDRESS_REQUEST });
+export const updateAddressSuccess = (updatedAddress) => ({ type: UPDATE_ADDRESS_SUCCESS, payload: updatedAddress });
+export const updateAddressFailure = (error) => ({ type: UPDATE_ADDRESS_FAILURE, payload: error });
+
+// YENİ: Adres silmek için Action Creator'lar
+export const deleteAddressRequest = () => ({ type: DELETE_ADDRESS_REQUEST });
+export const deleteAddressSuccess = (addressId) => ({ type: DELETE_ADDRESS_SUCCESS, payload: addressId });
+export const deleteAddressFailure = (error) => ({ type: DELETE_ADDRESS_FAILURE, payload: error });
 
 // --- Thunk Action Creator (Rolleri Çekmek İçin) ---
 export const fetchRoles = () => async (dispatch) => {
@@ -110,62 +149,230 @@ export const loginUser = (credentials, rememberMe, history) => async (dispatch) 
 
 // --- Thunk Action Creator (Token Doğrulama İçin) - GÜNCELLENDİ ---
 export const verifyToken = () => async (dispatch) => {
-  // 1. Önce localStorage'dan token'ı al
+  // 1. Oturum doğrulama sürecinin başladığını belirt
+  dispatch({ type: AUTH_VERIFY_PENDING });
+
   let token = localStorage.getItem('token');
   let tokenSource = 'localStorage';
 
-  // 2. localStorage'da yoksa sessionStorage'ı kontrol et
   if (!token) {
     token = sessionStorage.getItem('token');
     tokenSource = 'sessionStorage';
   }
 
-  // 3. Hiçbir yerde token yoksa işlemi bitir
   if (!token) {
-    // console.log("No token found in localStorage or sessionStorage."); // Konsolu kirletmemek için yorumlanabilir
+    // console.log("No token found. Setting auth status to failure."); // Bu log eklenebilir
+    dispatch({ type: AUTH_VERIFY_FAILURE }); // Token yoksa, doğrulama başarısız.
+    // dispatch(setUser(null)); // AUTH_VERIFY_FAILURE zaten user'ı null yapmalı (reducer'da öyle ayarladık)
     return;
   }
 
   console.log(`Token found in ${tokenSource}, attempting verification...`);
 
   try {
-    // 4. Token varsa, Axios instance interceptor'ı başlığı otomatik ekleyecek.
-    //    Doğrudan /verify endpoint'ine GET isteği gönder.
     const response = await axiosInstance.get('/verify');
 
-    // 5. Başarılı cevap (200 OK) geldiyse, kullanıcı bilgilerini al ve state'i güncelle.
-    if (response.status === 200) {
+    if (response.status === 200 && response.data) { // response.data'nın da var olduğunu kontrol et
       const userData = response.data;
       console.log("Token verified successfully. User data:", userData);
-      dispatch(setUser(userData));
-
-      // Opsiyonel: Yeni token gelirse, doğru storage'ı güncelle
-      // if (response.data.newToken) {
-      //   if (tokenSource === 'localStorage') {
-      //     localStorage.setItem('token', response.data.newToken);
-      //   } else {
-      //     sessionStorage.setItem('token', response.data.newToken);
-      //   }
-      // }
-
+      // Kullanıcı verisi ile birlikte başarı durumunu dispatch et
+      dispatch({ type: AUTH_VERIFY_SUCCESS, payload: userData }); 
+      // dispatch(setUser(userData)); // AUTH_VERIFY_SUCCESS zaten user'ı set ediyor (reducer'da)
     } else {
-      // Bu genellikle try/catch'e düşer ama yine de kontrol edelim.
-      console.warn("Token verification returned unexpected status:", response.status);
+      console.warn("Token verification returned unexpected status or no data:", response);
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
-      dispatch(setUser(null));
+      dispatch({ type: AUTH_VERIFY_FAILURE });
+      // dispatch(setUser(null)); // AUTH_VERIFY_FAILURE zaten user'ı null yapmalı
     }
-
   } catch (error) {
-    // 6. Hata oluştuysa (genellikle 401 Unauthorized), token geçersizdir.
     console.error("Token verification failed:", error.response?.data?.message || error.message);
-
-    // Token'ı her iki yerden de sil
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
+    dispatch({ type: AUTH_VERIFY_FAILURE });
+    // dispatch(setUser(null)); // AUTH_VERIFY_FAILURE zaten user'ı null yapmalı
+  }
+};
 
-    // Kullanıcı bilgilerini Redux state'inden sil
-    dispatch(setUser(null));
+// --- Thunk Action Creator (Adresleri Çekmek İçin) ---
+export const fetchAddresses = () => async (dispatch) => {
+  dispatch(getAddressesRequest());
+  console.log('[fetchAddresses] Request dispatched');
+  try {
+    const response = await axiosInstance.get('/user/address');
+    console.log('[fetchAddresses] Response received:', response);
+
+    if (response && (response.status === 200 || response.status === 201) && Array.isArray(response.data)) {
+      console.log('[fetchAddresses] Addresses fetched successfully (status:', response.status, '):', response.data);
+      dispatch(getAddressesSuccess(response.data));
+    } else {
+      console.error('[fetchAddresses] ERROR: Unexpected response structure or status!', response);
+      dispatch(getAddressesFailure("Unexpected response structure or status while fetching addresses."));
+      toast.error("Could not fetch addresses. Please try again.");
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to fetch addresses.";
+    console.error("[fetchAddresses] CATCH BLOCK ERROR:", errorMessage, "Full error object:", error);
+    dispatch(getAddressesFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+// --- Thunk Action Creator (Yeni Adres Eklemek İçin) ---
+// addressData: { title, name, surname, phone, city, district, neighborhood }
+// onComplete: Adres eklendikten sonra çağrılacak bir callback (örn: formu resetle, modal kapat)
+export const addAddress = (addressData, onComplete) => async (dispatch) => {
+  dispatch(addAddressRequest());
+  console.log('[addAddress] Request dispatched with data:', addressData);
+  try {
+    const response = await axiosInstance.post('/user/address', addressData);
+    console.log('[addAddress] Full API Response:', response);
+    console.log('[addAddress] API Response.data:', response.data); 
+
+    if (response && (response.status === 201 || response.status === 200) && response.data) {
+      let newAddressData = response.data;
+
+      // YENİ KONTROL: Eğer API {0: adresObjesi} formatında dönüyorsa, asıl objeyi al.
+      if (response.data && typeof response.data === 'object' && response.data.hasOwnProperty('0') && typeof response.data[0] === 'object' && response.data[0] !== null) {
+        console.log('[addAddress] API returned data in {0: object} format. Extracting object from key "0".', response.data[0]);
+        newAddressData = response.data[0];
+      }
+      // Ek olarak, API doğrudan bir dizi içinde tek bir obje dönerse ([{addressObject}]) onu da handle edebiliriz.
+      // else if (Array.isArray(response.data) && response.data.length === 1 && typeof response.data[0] === 'object' && response.data[0] !== null) {
+      //   console.log('[addAddress] API returned data as a single-element array. Extracting object from array.', response.data[0]);
+      //   newAddressData = response.data[0];
+      // }
+
+
+      // Güvenlik için, dispatch etmeden önce newAddressData'nın bir id'si olduğundan emin olalım (opsiyonel ama iyi bir pratik)
+      if (!newAddressData || typeof newAddressData.id === 'undefined') {
+        console.error('[addAddress] ERROR: Extracted address data is invalid or missing an ID. Original response.data:', response.data, 'Extracted:', newAddressData);
+        const errorMessage = "Yeni adres eklendi ancak sunucudan gelen veri ID içermiyor veya geçersiz.";
+        dispatch(addAddressFailure(errorMessage));
+        toast.error(errorMessage);
+        return; 
+      }
+
+      console.log('[addAddress] Address added successfully. Dispatching payload:', newAddressData);
+      dispatch(addAddressSuccess(newAddressData)); 
+      toast.success("Adres başarıyla eklendi!");
+      
+      if (onComplete && typeof onComplete === 'function') {
+        onComplete();
+      }
+    } else {
+      console.error('[addAddress] ERROR: Unexpected response structure or status!', response);
+      const errorMessage = response?.data?.message || "Yeni adres eklenirken beklenmedik bir durum oluştu.";
+      dispatch(addAddressFailure(errorMessage));
+      toast.error(errorMessage);
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Yeni adres eklenirken bir hata oluştu.";
+    console.error("[addAddress] CATCH BLOCK ERROR:", errorMessage, "Full error object:", error);
+    dispatch(addAddressFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+// --- Thunk Action Creator (Adres Güncellemek İçin) ---
+// addressData: { id, title, name, surname, phone, city, district, neighborhood }
+// onComplete: Adres güncellendikten sonra çağrılacak bir callback
+export const updateAddress = (addressData, onComplete) => async (dispatch) => {
+  dispatch(updateAddressRequest());
+  try {
+    if (!addressData.id) {
+      console.error('[updateAddress] ERROR: Address ID is missing for update.');
+      dispatch(updateAddressFailure("Güncellenecek adres için ID eksik."));
+      toast.error("Adres güncellenemedi: ID eksik.");
+      return;
+    }
+
+    const response = await axiosInstance.put('/user/address', addressData);
+    
+    if (response && (response.status === 200 || response.status === 201)) {
+      let addressToDispatch = null;
+
+      // 1. Önceki gibi response.data[0] içinde adres var mı diye kontrol et
+      if (response.data && response.data[0] && response.data[0].id) {
+        addressToDispatch = response.data[0];
+        console.log('[updateAddress] Using response.data[0] for store update.');
+      } 
+      // 2. Ya da response.data'nın kendisi adres objesi mi diye kontrol et
+      else if (response.data && response.data.id) {
+        addressToDispatch = response.data;
+        console.log('[updateAddress] Using response.data directly for store update.');
+      } 
+      // 3. YENİ DURUM: response.data boş bir obje {} ama status başarılı ise
+      //    Bu durumda, gönderdiğimiz addressData'yı güncellenmiş kabul et
+      else if (response.data && Object.keys(response.data).length === 0 && addressData.id) {
+        console.log('[updateAddress] API returned empty object on success, using submitted addressData for store update.');
+        addressToDispatch = addressData; // Gönderdiğimiz veriyi kullan
+      }
+
+      // Eğer geçerli bir adres objesi bulabildiysek (yukarıdaki senaryolardan biriyle)
+      if (addressToDispatch && addressToDispatch.id) {
+        console.log('[updateAddress] Address updated successfully (status:', response.status, '). Dispatching payload:', addressToDispatch);
+        dispatch(updateAddressSuccess(addressToDispatch));
+        toast.success("Adres başarıyla güncellendi!");
+
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete();
+        }
+      } else {
+        // Başarılı status ama beklenen veri yapısı yoksa
+        console.error('[updateAddress] ERROR: Successful status but unexpected response.data structure. Data:', response.data, 'Submitted:', addressData);
+        dispatch(updateAddressFailure("Adres güncellendi ancak sunucudan gelen veri işlenemedi."));
+        toast.error("Adres güncellendi ancak cevap verisi işlenemedi.");
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete(); // Formu yine de kapatmak için
+        }
+      }
+    } else {
+      // Başarısız status veya response objesi yoksa
+      console.error('[updateAddress] ERROR: Unexpected response structure or non-successful status!', response);
+      const errorMessage = response?.data?.message || "Adres güncellenirken beklenmedik bir durum oluştu.";
+      dispatch(updateAddressFailure(errorMessage));
+      toast.error(errorMessage);
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Adres güncellenirken bir hata oluştu.";
+    console.error("[updateAddress] CATCH BLOCK ERROR:", errorMessage, "Full error object:", error);
+    dispatch(updateAddressFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+// YENİ: --- Thunk Action Creator (Adres Silmek İçin) ---
+// addressId: Silinecek adresin ID'si
+// onComplete: Adres silindikten sonra çağrılacak bir callback (opsiyonel)
+export const deleteAddress = (addressId, onComplete) => async (dispatch) => {
+  dispatch(deleteAddressRequest());
+  console.log(`[deleteAddress] Request dispatched for address ID: ${addressId}`);
+  try {
+    const response = await axiosInstance.delete(`/user/address/${addressId}`);
+    console.log('[deleteAddress] Response received:', response);
+
+    // Genellikle DELETE istekleri başarılı olursa 200 OK veya 204 No Content döner.
+    // API'miz 201 Created ve bir mesajla dönüyor.
+    if (response && (response.status === 200 || response.status === 204 || response.status === 201)) {
+      console.log(`[deleteAddress] Address ID: ${addressId} deleted successfully (status: ${response.status}). Data:`, response.data);
+      dispatch(deleteAddressSuccess(addressId)); 
+      toast.success("Adres başarıyla silindi!");
+
+      if (onComplete && typeof onComplete === 'function') {
+        onComplete();
+      }
+    } else {
+      console.error(`[deleteAddress] ERROR: Unexpected response status while deleting address ID: ${addressId}!`, response);
+      const errorMessage = response?.data?.message || "Adres silinirken beklenmedik bir durum oluştu.";
+      dispatch(deleteAddressFailure(errorMessage));
+      toast.error(errorMessage);
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Adres silinirken bir hata oluştu.";
+    console.error(`[deleteAddress] CATCH BLOCK ERROR for address ID: ${addressId}:`, errorMessage, "Full error object:", error);
+    dispatch(deleteAddressFailure(errorMessage));
+    toast.error(errorMessage);
   }
 };
 

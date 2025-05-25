@@ -1,9 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom'; // Eğer butonlar Link olacaksa
+import { Link, useHistory } from 'react-router-dom'; // Eğer butonlar Link olacaksa
 
 const OrderSummary = () => {
   const { cart } = useSelector((state) => state.shoppingCart);
+  const history = useHistory(); // useHistory hook'unu kullan
 
   const productsTotal = cart.reduce((acc, item) => acc + item.product.price * item.count, 0);
   
@@ -11,22 +12,18 @@ const OrderSummary = () => {
   const shippingDiscountThreshold = 50; // 50 Dolar ve üzeri
   const shippingDiscount = productsTotal >= shippingDiscountThreshold ? shippingCost : 0;
   const finalShipping = shippingCost - shippingDiscount;
-
   const grandTotal = productsTotal + finalShipping;
 
-  // "Create Order" butonunun şimdilik bir işlevi olmayacak
-  const handleCreateOrder = () => {
-    console.log('Create Order button clicked - no functionality yet.');
-    // Gelecekte burada sipariş oluşturma işlemleri yapılacak
-    // Örneğin: dispatch(createOrderAction(cart, paymentDetails, shippingAddress));
-    // Ve kullanıcıyı ödeme sayfasına veya sipariş onay sayfasına yönlendirme
-    // history.push('/checkout'); // react-router-dom v5 için
+  const handleProceedToCheckout = () => { // Fonksiyon adını değiştirebiliriz
+    console.log('Proceed to Checkout button clicked - redirecting to /checkout');
+    // Kullanıcıyı /checkout sayfasına yönlendir
+    history.push('/checkout'); 
   };
 
   return (
     <div className="bg-white p-6 shadow-md rounded-lg border border-gray-200">
       <button
-        onClick={handleCreateOrder}
+        onClick={handleProceedToCheckout} // Güncellenmiş fonksiyonu ata
         className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md transition duration-150 ease-in-out mb-6"
       >
         Sepeti Onayla
@@ -66,7 +63,7 @@ const OrderSummary = () => {
       </div>
 
       <button
-        onClick={handleCreateOrder}
+        onClick={handleProceedToCheckout} // Güncellenmiş fonksiyonu ata
         className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md transition duration-150 ease-in-out"
       >
         Sepeti Onayla

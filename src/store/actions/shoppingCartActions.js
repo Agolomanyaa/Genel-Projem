@@ -7,6 +7,7 @@ export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 export const UPDATE_CART_ITEM_COUNT = 'UPDATE_CART_ITEM_COUNT';
 export const CLEAR_CART = 'CLEAR_CART'; // Tüm sepeti temizlemek için opsiyonel
 export const TOGGLE_PRODUCT_CHECKED = 'TOGGLE_PRODUCT_CHECKED'; // Bu satırın olduğundan emin olalım
+export const LOAD_CART_FROM_STORAGE = 'LOAD_CART_FROM_STORAGE'; // Bu zaten vardı
 // export const TOGGLE_CART_ITEM_CHECKED = 'TOGGLE_CART_ITEM_CHECKED'; // Şimdilik kullanmayabiliriz
 
 // Action Creator Fonksiyonları
@@ -75,6 +76,12 @@ export const toggleProductChecked = (productId) => ({ // Bu fonksiyonun export e
 //   type: TOGGLE_CART_ITEM_CHECKED,
 //   payload: { productId },
 // });
+
+// BU FONKSİYONUN EXPORT EDİLDİĞİNDEN EMİN OLUN
+export const loadCartFromStorage = (cart) => ({
+  type: LOAD_CART_FROM_STORAGE,
+  payload: cart,
+});
 
 // TODO: Action Creator fonksiyonları buraya eklenecek
 // TODO: Sepete ekleme/çıkarma/güncelleme gibi daha karmaşık action'lar ileride eklenebilir 

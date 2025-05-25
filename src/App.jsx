@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { verifyToken } from './store/actions/clientActions';
 import { fetchCategories } from './store/actions/productActions';
+import { loadCartFromStorage } from './store/actions/shoppingCartActions';
 import HomePage from './pages/HomePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ContactPage from './pages/ContactPage';
@@ -15,6 +16,7 @@ import LoginPage from './pages/LoginPage';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute'; // Bu componentin v5 ile uyumlu olduğundan emin olalım
 import ShoppingCartPage from './pages/ShoppingCartPage'; // Bu import doğru
+import OrderPage from './pages/OrderPage'; // Yeni sayfayı import et
 
 function App() {
   const dispatch = useDispatch();
@@ -22,6 +24,21 @@ function App() {
   useEffect(() => {
     dispatch(verifyToken());
     dispatch(fetchCategories());
+
+    try {
+      const storedCart = localStorage.getItem('cart');
+      if (storedCart) {
+        const parsedCart = JSON.parse(storedCart);
+        if (Array.isArray(parsedCart)) {
+          dispatch(loadCartFromStorage(parsedCart));
+        } else {
+          localStorage.removeItem('cart');
+        }
+      }
+    } catch (e) {
+      console.error("Could not load cart from localStorage", e);
+      localStorage.removeItem('cart');
+    }
   }, [dispatch]);
 
   return (
@@ -50,8 +67,10 @@ function App() {
         {/* ShoppingCartPage için Route (element yerine component) */}
         <Route path="/cart" component={ShoppingCartPage} /> 
 
+        {/* Checkout sayfası için Korumalı Rota */}
+        <ProtectedRoute path="/checkout" component={OrderPage} /> {/* Burası ProtectedRoute kullanımına göre değişebilir */}
+        
         {/* ProtectedRoute'lar component prop'u ile kalmalı */}
-        <ProtectedRoute path="/checkout" component={() => <div>Checkout Page (Protected)</div>} />
         <ProtectedRoute path="/orders" component={() => <div>Order History Page (Protected)</div>} />
         <ProtectedRoute path="/order" component={() => <div>Order Page (Protected)</div>} />
         <ProtectedRoute path="/order-confirmation" component={() => <div>Order Confirmation Page (Protected)</div>} />
