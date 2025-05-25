@@ -1,4 +1,4 @@
-import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE, GET_ADDRESSES_REQUEST, GET_ADDRESSES_SUCCESS, GET_ADDRESSES_FAILURE, ADD_ADDRESS_REQUEST, ADD_ADDRESS_SUCCESS, ADD_ADDRESS_FAILURE, UPDATE_ADDRESS_REQUEST, UPDATE_ADDRESS_SUCCESS, UPDATE_ADDRESS_FAILURE, DELETE_ADDRESS_REQUEST, DELETE_ADDRESS_SUCCESS, DELETE_ADDRESS_FAILURE, AUTH_VERIFY_PENDING, AUTH_VERIFY_SUCCESS, AUTH_VERIFY_FAILURE } from '../actions/clientActions';
+import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE, GET_ADDRESSES_REQUEST, GET_ADDRESSES_SUCCESS, GET_ADDRESSES_FAILURE, ADD_ADDRESS_REQUEST, ADD_ADDRESS_SUCCESS, ADD_ADDRESS_FAILURE, UPDATE_ADDRESS_REQUEST, UPDATE_ADDRESS_SUCCESS, UPDATE_ADDRESS_FAILURE, DELETE_ADDRESS_REQUEST, DELETE_ADDRESS_SUCCESS, DELETE_ADDRESS_FAILURE, AUTH_VERIFY_PENDING, AUTH_VERIFY_SUCCESS, AUTH_VERIFY_FAILURE, GET_CREDIT_CARDS_REQUEST, GET_CREDIT_CARDS_SUCCESS, GET_CREDIT_CARDS_FAILURE, ADD_CREDIT_CARD_REQUEST, ADD_CREDIT_CARD_SUCCESS, ADD_CREDIT_CARD_FAILURE, UPDATE_CREDIT_CARD_REQUEST, UPDATE_CREDIT_CARD_SUCCESS, UPDATE_CREDIT_CARD_FAILURE, DELETE_CREDIT_CARD_REQUEST, DELETE_CREDIT_CARD_SUCCESS, DELETE_CREDIT_CARD_FAILURE } from '../actions/clientActions';
 
 // Başlangıç Durumu (Initial State)
 const FETCH_STATES = { // Örnek, eğer productReducer'daki gibi merkezi bir yapınız yoksa
@@ -28,6 +28,14 @@ const initialState = {
   updateAddressError: null,
   deleteAddressFetchState: FETCH_STATES.NOT_FETCHED,
   deleteAddressError: null,
+  getCreditCardsFetchState: FETCH_STATES.NOT_FETCHED,
+  getCreditCardsError: null,
+  addCreditCardFetchState: FETCH_STATES.NOT_FETCHED,
+  addCreditCardError: null,
+  updateCreditCardFetchState: FETCH_STATES.NOT_FETCHED,
+  updateCreditCardError: null,
+  deleteCreditCardFetchState: FETCH_STATES.NOT_FETCHED,
+  deleteCreditCardError: null,
 };
 
 // Client Reducer Fonksiyonu
@@ -149,7 +157,84 @@ const clientReducer = (state = initialState, action) => {
         deleteAddressFetchState: FETCH_STATES.FAILED,
         deleteAddressError: action.payload,
       };
-    // TODO: addressList ve creditCards için action'lar gerekirse eklenebilir
+    case GET_CREDIT_CARDS_REQUEST:
+      return {
+        ...state,
+        getCreditCardsFetchState: FETCH_STATES.FETCHING,
+        getCreditCardsError: null,
+      };
+    case GET_CREDIT_CARDS_SUCCESS:
+      return {
+        ...state,
+        getCreditCardsFetchState: FETCH_STATES.FETCHED,
+        creditCards: action.payload,
+      };
+    case GET_CREDIT_CARDS_FAILURE:
+      return {
+        ...state,
+        getCreditCardsFetchState: FETCH_STATES.FAILED,
+        getCreditCardsError: action.payload,
+        creditCards: [],
+      };
+    case ADD_CREDIT_CARD_REQUEST:
+      return {
+        ...state,
+        addCreditCardFetchState: FETCH_STATES.FETCHING,
+        addCreditCardError: null,
+      };
+    case ADD_CREDIT_CARD_SUCCESS:
+      return {
+        ...state,
+        addCreditCardFetchState: FETCH_STATES.FETCHED,
+        creditCards: [action.payload, ...state.creditCards],
+        addCreditCardError: null,
+      };
+    case ADD_CREDIT_CARD_FAILURE:
+      return {
+        ...state,
+        addCreditCardFetchState: FETCH_STATES.FAILED,
+        addCreditCardError: action.payload,
+      };
+    case UPDATE_CREDIT_CARD_REQUEST:
+      return {
+        ...state,
+        updateCreditCardFetchState: FETCH_STATES.FETCHING,
+        updateCreditCardError: null,
+      };
+    case UPDATE_CREDIT_CARD_SUCCESS:
+      return {
+        ...state,
+        updateCreditCardFetchState: FETCH_STATES.FETCHED,
+        creditCards: state.creditCards.map(card =>
+          card.id === action.payload.id ? action.payload : card
+        ),
+        updateCreditCardError: null,
+      };
+    case UPDATE_CREDIT_CARD_FAILURE:
+      return {
+        ...state,
+        updateCreditCardFetchState: FETCH_STATES.FAILED,
+        updateCreditCardError: action.payload,
+      };
+    case DELETE_CREDIT_CARD_REQUEST:
+      return {
+        ...state,
+        deleteCreditCardFetchState: FETCH_STATES.FETCHING,
+        deleteCreditCardError: null,
+      };
+    case DELETE_CREDIT_CARD_SUCCESS:
+      return {
+        ...state,
+        deleteCreditCardFetchState: FETCH_STATES.FETCHED,
+        creditCards: state.creditCards.filter(card => card.id !== action.payload),
+        deleteCreditCardError: null,
+      };
+    case DELETE_CREDIT_CARD_FAILURE:
+      return {
+        ...state,
+        deleteCreditCardFetchState: FETCH_STATES.FAILED,
+        deleteCreditCardError: action.payload,
+      };
     default:
       return state; // Bilinmeyen action tipi için mevcut state'i döndür
   }

@@ -33,6 +33,22 @@ export const DELETE_ADDRESS_FAILURE = 'DELETE_ADDRESS_FAILURE';
 export const AUTH_VERIFY_PENDING = 'AUTH_VERIFY_PENDING';
 export const AUTH_VERIFY_SUCCESS = 'AUTH_VERIFY_SUCCESS';
 export const AUTH_VERIFY_FAILURE = 'AUTH_VERIFY_FAILURE';
+// YENİ: Kredi Kartları İçin Action Tipleri
+export const GET_CREDIT_CARDS_REQUEST = 'GET_CREDIT_CARDS_REQUEST';
+export const GET_CREDIT_CARDS_SUCCESS = 'GET_CREDIT_CARDS_SUCCESS';
+export const GET_CREDIT_CARDS_FAILURE = 'GET_CREDIT_CARDS_FAILURE';
+
+export const ADD_CREDIT_CARD_REQUEST = 'ADD_CREDIT_CARD_REQUEST';
+export const ADD_CREDIT_CARD_SUCCESS = 'ADD_CREDIT_CARD_SUCCESS';
+export const ADD_CREDIT_CARD_FAILURE = 'ADD_CREDIT_CARD_FAILURE';
+
+export const UPDATE_CREDIT_CARD_REQUEST = 'UPDATE_CREDIT_CARD_REQUEST';
+export const UPDATE_CREDIT_CARD_SUCCESS = 'UPDATE_CREDIT_CARD_SUCCESS';
+export const UPDATE_CREDIT_CARD_FAILURE = 'UPDATE_CREDIT_CARD_FAILURE';
+
+export const DELETE_CREDIT_CARD_REQUEST = 'DELETE_CREDIT_CARD_REQUEST';
+export const DELETE_CREDIT_CARD_SUCCESS = 'DELETE_CREDIT_CARD_SUCCESS';
+export const DELETE_CREDIT_CARD_FAILURE = 'DELETE_CREDIT_CARD_FAILURE';
 
 // Action Creator Fonksiyonları
 export const setUser = (userData) => ({
@@ -79,6 +95,84 @@ export const updateAddressFailure = (error) => ({ type: UPDATE_ADDRESS_FAILURE, 
 export const deleteAddressRequest = () => ({ type: DELETE_ADDRESS_REQUEST });
 export const deleteAddressSuccess = (addressId) => ({ type: DELETE_ADDRESS_SUCCESS, payload: addressId });
 export const deleteAddressFailure = (error) => ({ type: DELETE_ADDRESS_FAILURE, payload: error });
+
+// YENİ: Kredi Kartları İçin Action Creator'lar
+export const getCreditCardsRequest = () => ({ type: GET_CREDIT_CARDS_REQUEST });
+export const getCreditCardsSuccess = (cards) => ({ type: GET_CREDIT_CARDS_SUCCESS, payload: cards });
+export const getCreditCardsFailure = (error) => ({ type: GET_CREDIT_CARDS_FAILURE, payload: error });
+
+export const addCreditCardRequest = () => ({ type: ADD_CREDIT_CARD_REQUEST });
+export const addCreditCardSuccess = (newCard) => ({ type: ADD_CREDIT_CARD_SUCCESS, payload: newCard });
+export const addCreditCardFailure = (error) => ({ type: ADD_CREDIT_CARD_FAILURE, payload: error });
+
+export const updateCreditCard = (cardData, callback) => async (dispatch, getState) => {
+  dispatch({ type: UPDATE_CREDIT_CARD_REQUEST });
+  console.log('[updateCreditCard] Request Data:', cardData);
+  try {
+    const response = await axiosInstance.put('/user/card', cardData); 
+    
+    console.log('[updateCreditCard] Raw API Response:', response);
+    console.log('[updateCreditCard] Raw API Response.data:', response.data);
+
+    let updatedCard = null;
+
+    if (response && response.data) {
+      if (response.data.id) { // İdeal durum: API doğrudan güncellenmiş kartı döndürür
+        updatedCard = response.data;
+      } else if (typeof response.data === 'object' && response.data[0] && response.data[0].id) {
+        // API {0: cardObject} formatında döndürürse
+        console.log('[updateCreditCard] API returned data in {0: object} format. Extracting object from key "0".');
+        updatedCard = response.data[0];
+      }
+    }
+
+    if (updatedCard) {
+      dispatch({ type: UPDATE_CREDIT_CARD_SUCCESS, payload: updatedCard });
+      if (callback) callback(updatedCard);
+    } else if (response && response.status >= 200 && response.status < 300 && cardData.id) {
+      // API güncellenmiş kartı döndürmüyor veya beklenmedik bir formatta döndürüyor
+      // ama başarılı bir statü kodu (2xx) veriyorsa ve elimizde gönderdiğimiz cardData varsa,
+      // bunu optimistik güncelleme için kullanalım.
+      console.warn('[updateCreditCard] API did not return the updated card object in the expected format, but returned a success status. Using original cardData for optimism.');
+      dispatch({ type: UPDATE_CREDIT_CARD_SUCCESS, payload: cardData }); // Gönderilen cardData'yı kullan
+      if (callback) callback(cardData);
+    }
+     else {
+      console.error('[updateCreditCard] ERROR: Unexpected API response structure or unsuccessful update!', response.data);
+      dispatch({ type: UPDATE_CREDIT_CARD_FAILURE, payload: 'Güncellenmiş kart verisi alınamadı veya format hatalı.' });
+    }
+  } catch (error) {
+    console.error('[updateCreditCard] API Error:', error.response || error);
+    dispatch({
+      type: UPDATE_CREDIT_CARD_FAILURE,
+      payload: error.response ? error.response.data.message || 'Kredi kartı güncellenirken bir hata oluştu.' : error.message
+    });
+  }
+};
+
+export const deleteCreditCard = (cardId, onComplete) => async (dispatch) => {
+  if (!cardId) {
+    console.error('[deleteCreditCard] ERROR: Card ID is missing for deletion.');
+    toast.error('Silinecek kart için ID eksik.');
+    dispatch(deleteCreditCardFailure("Silinecek kart için ID eksik."));
+    return;
+  }
+  dispatch(deleteCreditCardRequest());
+  try {
+    // API endpoint'i /user/card/:cardId olarak belirtilmiş.
+    await axiosInstance.delete(`/user/card/${cardId}`);
+    // DELETE isteği genellikle bir body dönmez, başarılı olursa 200 OK veya 204 No Content döner.
+    // Biz doğrudan cardId ile success action'ını dispatch ediyoruz.
+    dispatch(deleteCreditCardSuccess(cardId));
+    toast.success('Kredi kartı başarıyla silindi!');
+    if (onComplete) onComplete();
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Kredi kartı silinirken bir hata oluştu.';
+    console.error('[deleteCreditCard] CATCH ERROR:', errorMessage, error);
+    dispatch(deleteCreditCardFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
 
 // --- Thunk Action Creator (Rolleri Çekmek İçin) ---
 export const fetchRoles = () => async (dispatch) => {
@@ -372,6 +466,72 @@ export const deleteAddress = (addressId, onComplete) => async (dispatch) => {
     const errorMessage = error.response?.data?.message || "Adres silinirken bir hata oluştu.";
     console.error(`[deleteAddress] CATCH BLOCK ERROR for address ID: ${addressId}:`, errorMessage, "Full error object:", error);
     dispatch(deleteAddressFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+// --- THUNK ACTION CREATORS FOR CREDIT CARDS ---
+
+// Kayıtlı Kredi Kartlarını Çekmek İçin
+export const fetchCreditCards = () => async (dispatch) => {
+  dispatch(getCreditCardsRequest());
+  try {
+    const response = await axiosInstance.get('/user/card');
+    // API'nin doğrudan kart listesini Array olarak döndürdüğünü varsayıyoruz.
+    // Eğer { data: [...] } gibi bir yapıda dönüyorsa response.data.data gibi erişmek gerekebilir.
+    if (response && response.data && Array.isArray(response.data)) {
+      dispatch(getCreditCardsSuccess(response.data));
+    } else {
+      console.error('[fetchCreditCards] ERROR: Unexpected API response structure!', response);
+      dispatch(getCreditCardsFailure('Kredi kartları getirilirken beklenmedik yanıt formatı.'));
+      toast.error('Kredi kartları getirilemedi.');
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Kredi kartları getirilirken bir hata oluştu.';
+    console.error('[fetchCreditCards] CATCH ERROR:', errorMessage, error);
+    dispatch(getCreditCardsFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+// Yeni Kredi Kartı Eklemek İçin
+// cardData: { card_no, expire_month, expire_year, name_on_card }
+export const addCreditCard = (cardData, onComplete) => async (dispatch) => {
+  dispatch(addCreditCardRequest());
+  try {
+    const response = await axiosInstance.post('/user/card', cardData);
+    
+    console.log('[addCreditCard] Raw API Response:', response);
+    console.log('[addCreditCard] Raw API Response.data:', response.data);
+
+    let newCardData = null;
+
+    // YENİ KONTROL: Eğer API {0: cardObject} formatında dönüyorsa, asıl objeyi al.
+    if (response && response.data && typeof response.data === 'object' && response.data.hasOwnProperty('0') && typeof response.data[0] === 'object' && response.data[0] !== null) {
+      console.log('[addCreditCard] API returned data in {0: object} format. Extracting object from key "0".');
+      newCardData = response.data[0];
+    } 
+    // Olası başka bir senaryo: API doğrudan kart objesini dönüyorsa
+    else if (response && response.data && response.data.id) {
+      console.log('[addCreditCard] API returned data directly as card object.');
+      newCardData = response.data;
+    }
+
+    // newCardData'nın geçerli bir ID'si var mı kontrol et
+    if (newCardData && newCardData.id) {
+      dispatch(addCreditCardSuccess(newCardData));
+      toast.success('Kredi kartı başarıyla eklendi!');
+      if (onComplete) onComplete();
+    } else {
+      // Eğer yukarıdaki koşullar sağlanmazsa veya newCardData.id yoksa
+      console.error('[addCreditCard] ERROR: Unexpected API response structure or missing ID after adding card!', response.data);
+      dispatch(addCreditCardFailure('Kredi kartı eklendikten sonra beklenmedik yanıt formatı veya ID eksik.'));
+      toast.error('Kredi kartı eklenemedi (yanıt formatı).');
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Kredi kartı eklenirken bir hata oluştu.';
+    console.error('[addCreditCard] CATCH ERROR:', errorMessage, error);
+    dispatch(addCreditCardFailure(errorMessage));
     toast.error(errorMessage);
   }
 };
