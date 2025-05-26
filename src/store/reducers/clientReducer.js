@@ -1,4 +1,4 @@
-import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE, GET_ADDRESSES_REQUEST, GET_ADDRESSES_SUCCESS, GET_ADDRESSES_FAILURE, ADD_ADDRESS_REQUEST, ADD_ADDRESS_SUCCESS, ADD_ADDRESS_FAILURE, UPDATE_ADDRESS_REQUEST, UPDATE_ADDRESS_SUCCESS, UPDATE_ADDRESS_FAILURE, DELETE_ADDRESS_REQUEST, DELETE_ADDRESS_SUCCESS, DELETE_ADDRESS_FAILURE, AUTH_VERIFY_PENDING, AUTH_VERIFY_SUCCESS, AUTH_VERIFY_FAILURE, GET_CREDIT_CARDS_REQUEST, GET_CREDIT_CARDS_SUCCESS, GET_CREDIT_CARDS_FAILURE, ADD_CREDIT_CARD_REQUEST, ADD_CREDIT_CARD_SUCCESS, ADD_CREDIT_CARD_FAILURE, UPDATE_CREDIT_CARD_REQUEST, UPDATE_CREDIT_CARD_SUCCESS, UPDATE_CREDIT_CARD_FAILURE, DELETE_CREDIT_CARD_REQUEST, DELETE_CREDIT_CARD_SUCCESS, DELETE_CREDIT_CARD_FAILURE } from '../actions/clientActions';
+import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE, GET_ADDRESSES_REQUEST, GET_ADDRESSES_SUCCESS, GET_ADDRESSES_FAILURE, ADD_ADDRESS_REQUEST, ADD_ADDRESS_SUCCESS, ADD_ADDRESS_FAILURE, UPDATE_ADDRESS_REQUEST, UPDATE_ADDRESS_SUCCESS, UPDATE_ADDRESS_FAILURE, DELETE_ADDRESS_REQUEST, DELETE_ADDRESS_SUCCESS, DELETE_ADDRESS_FAILURE, AUTH_VERIFY_PENDING, AUTH_VERIFY_SUCCESS, AUTH_VERIFY_FAILURE, GET_CREDIT_CARDS_REQUEST, GET_CREDIT_CARDS_SUCCESS, GET_CREDIT_CARDS_FAILURE, ADD_CREDIT_CARD_REQUEST, ADD_CREDIT_CARD_SUCCESS, ADD_CREDIT_CARD_FAILURE, UPDATE_CREDIT_CARD_REQUEST, UPDATE_CREDIT_CARD_SUCCESS, UPDATE_CREDIT_CARD_FAILURE, DELETE_CREDIT_CARD_REQUEST, DELETE_CREDIT_CARD_SUCCESS, DELETE_CREDIT_CARD_FAILURE, CREATE_ORDER_REQUEST, CREATE_ORDER_SUCCESS, CREATE_ORDER_FAILURE } from '../actions/clientActions';
 
 // Başlangıç Durumu (Initial State)
 const FETCH_STATES = { // Örnek, eğer productReducer'daki gibi merkezi bir yapınız yoksa
@@ -36,6 +36,9 @@ const initialState = {
   updateCreditCardError: null,
   deleteCreditCardFetchState: FETCH_STATES.NOT_FETCHED,
   deleteCreditCardError: null,
+  createOrderFetchState: FETCH_STATES.NOT_FETCHED,
+  createOrderError: null,
+  lastOrder: null, // Oluşturulan son sipariş bilgisini tutmak için
 };
 
 // Client Reducer Fonksiyonu
@@ -234,6 +237,25 @@ const clientReducer = (state = initialState, action) => {
         ...state,
         deleteCreditCardFetchState: FETCH_STATES.FAILED,
         deleteCreditCardError: action.payload,
+      };
+    case CREATE_ORDER_REQUEST:
+      return {
+        ...state,
+        createOrderFetchState: FETCH_STATES.FETCHING,
+        createOrderError: null,
+        lastOrder: null,
+      };
+    case CREATE_ORDER_SUCCESS:
+      return {
+        ...state,
+        createOrderFetchState: FETCH_STATES.FETCHED,
+        lastOrder: action.payload, // API'den dönen sipariş bilgisini kaydet
+      };
+    case CREATE_ORDER_FAILURE:
+      return {
+        ...state,
+        createOrderFetchState: FETCH_STATES.FAILED,
+        createOrderError: action.payload,
       };
     default:
       return state; // Bilinmeyen action tipi için mevcut state'i döndür

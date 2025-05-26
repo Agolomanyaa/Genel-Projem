@@ -6,7 +6,7 @@ const MainLayout = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <Header /> {/* Sadece Header çağrılıyor */}
-      <main className="flex-grow">
+      <main className="flex-grow pt-[90px]"> {/* Navbar yüksekliği kadar padding-top eklendi */}
         {children}
       </main>
       <Footer />

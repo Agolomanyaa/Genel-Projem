@@ -1,5 +1,6 @@
 import axiosInstance from '../../api/axiosInstance'; // axiosInstance'ı import et
 import { toast } from 'react-toastify'; // Toastify kullanıyorsanız
+import { clearCart } from './shoppingCartActions'; // Sepeti temizlemek için import et
 
 // Action Tipleri
 export const SET_USER = 'SET_USER';
@@ -49,6 +50,14 @@ export const UPDATE_CREDIT_CARD_FAILURE = 'UPDATE_CREDIT_CARD_FAILURE';
 export const DELETE_CREDIT_CARD_REQUEST = 'DELETE_CREDIT_CARD_REQUEST';
 export const DELETE_CREDIT_CARD_SUCCESS = 'DELETE_CREDIT_CARD_SUCCESS';
 export const DELETE_CREDIT_CARD_FAILURE = 'DELETE_CREDIT_CARD_FAILURE';
+
+// YENİ: Sipariş oluşturma için Action Tipleri
+export const CREATE_ORDER_REQUEST = 'CREATE_ORDER_REQUEST';
+export const CREATE_ORDER_SUCCESS = 'CREATE_ORDER_SUCCESS';
+export const CREATE_ORDER_FAILURE = 'CREATE_ORDER_FAILURE';
+
+// Alışveriş sepeti için (eğer yoksa shoppingCartActions.js'e eklenebilir)
+// export const CLEAR_CART = 'CLEAR_CART';
 
 // Action Creator Fonksiyonları
 export const setUser = (userData) => ({
@@ -533,6 +542,48 @@ export const addCreditCard = (cardData, onComplete) => async (dispatch) => {
     console.error('[addCreditCard] CATCH ERROR:', errorMessage, error);
     dispatch(addCreditCardFailure(errorMessage));
     toast.error(errorMessage);
+  }
+};
+
+// YENİ: Sipariş Oluşturmak İçin Thunk Action Creator
+export const createOrder = (orderDetails, callbackSuccess, callbackError) => async (dispatch, getState) => {
+  dispatch({ type: CREATE_ORDER_REQUEST });
+  console.log('[createOrder] Request dispatched with orderDetails:', orderDetails);
+
+  try {
+    const response = await axiosInstance.post('/order', orderDetails);
+    console.log('[createOrder] API Response:', response);
+
+    // API'nin başarılı bir sipariş oluşturma sonrası ne döndüğünü kontrol etmemiz lazım.
+    // Genellikle oluşturulan siparişin detaylarını veya bir başarı mesajını döndürür.
+    // T22'de payload belirtilmiş ama response için bir yapı yok, o yüzden esnek olalım.
+    if (response && (response.status === 201 || response.status === 200) && response.data) {
+      // Başarılı yanıt
+      dispatch({ type: CREATE_ORDER_SUCCESS, payload: response.data }); // API'den dönen sipariş verisi
+      dispatch(clearCart()); // Sipariş başarılıysa sepeti temizle
+      toast.success('Siparişiniz başarıyla oluşturuldu!'); // Kullanıcıya bildirim
+
+      if (callbackSuccess && typeof callbackSuccess === 'function') {
+        callbackSuccess(response.data); // Başarı durumunda callback'i çağır
+      }
+    } else {
+      // Beklenmedik başarılı yanıt formatı
+      console.error('[createOrder] ERROR: Unexpected success response structure or status!', response);
+      const errorMessage = response?.data?.message || 'Sipariş oluşturuldu ancak sunucudan beklenmedik bir yanıt alındı.';
+      dispatch({ type: CREATE_ORDER_FAILURE, payload: errorMessage });
+      toast.error(errorMessage);
+      if (callbackError && typeof callbackError === 'function') {
+        callbackError(errorMessage);
+      }
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Sipariş oluşturulurken bir hata oluştu.';
+    console.error('[createOrder] CATCH ERROR:', errorMessage, 'Full error object:', error.response || error);
+    dispatch({ type: CREATE_ORDER_FAILURE, payload: errorMessage });
+    toast.error(errorMessage);
+    if (callbackError && typeof callbackError === 'function') {
+      callbackError(errorMessage);
+    }
   }
 };
 
