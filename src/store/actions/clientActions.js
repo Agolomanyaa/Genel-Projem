@@ -56,6 +56,11 @@ export const CREATE_ORDER_REQUEST = 'CREATE_ORDER_REQUEST';
 export const CREATE_ORDER_SUCCESS = 'CREATE_ORDER_SUCCESS';
 export const CREATE_ORDER_FAILURE = 'CREATE_ORDER_FAILURE';
 
+// YENİ: Sipariş Geçmişi İçin Action Tipleri
+export const FETCH_ORDERS_REQUEST = 'FETCH_ORDERS_REQUEST';
+export const FETCH_ORDERS_SUCCESS = 'FETCH_ORDERS_SUCCESS';
+export const FETCH_ORDERS_FAILURE = 'FETCH_ORDERS_FAILURE';
+
 // Alışveriş sepeti için (eğer yoksa shoppingCartActions.js'e eklenebilir)
 // export const CLEAR_CART = 'CLEAR_CART';
 
@@ -584,6 +589,33 @@ export const createOrder = (orderDetails, callbackSuccess, callbackError) => asy
     if (callbackError && typeof callbackError === 'function') {
       callbackError(errorMessage);
     }
+  }
+};
+
+// YENİ: Sipariş Geçmişini Çekmek İçin Thunk Action Creator
+export const fetchOrders = () => async (dispatch) => {
+  dispatch({ type: FETCH_ORDERS_REQUEST });
+  console.log('[fetchOrders] Request dispatched');
+  try {
+    const response = await axiosInstance.get('/order'); // API endpoint'i
+    console.log('[fetchOrders] API Response:', response);
+
+    // API'den gelen yanıtın response.data'sının BİR DİZİ olmasını bekliyoruz.
+    // VE status kodunun 200 veya 201 olmasını kabul ediyoruz.
+    if (response && response.data && Array.isArray(response.data) && (response.status === 200 || response.status === 201)) {
+      dispatch({ type: FETCH_ORDERS_SUCCESS, payload: response.data }); // payload olarak response.data kullanılacak
+      console.log('[fetchOrders] Orders fetched successfully:', response.data);
+    } else {
+      const errorMessage = 'Sipariş geçmişi alınırken beklenmedik yanıt formatı veya hatalı durum kodu.';
+      console.error('[fetchOrders] ERROR:', errorMessage, 'Status:', response?.status, 'Response Data:', response?.data);
+      dispatch({ type: FETCH_ORDERS_FAILURE, payload: errorMessage });
+      toast.error(errorMessage);
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Sipariş geçmişi alınırken bir hata oluştu.';
+    console.error('[fetchOrders] CATCH ERROR:', errorMessage, error.response || error);
+    dispatch({ type: FETCH_ORDERS_FAILURE, payload: errorMessage });
+    toast.error(errorMessage);
   }
 };
 

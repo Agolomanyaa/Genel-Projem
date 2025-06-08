@@ -22,6 +22,7 @@ const createCategorySlug = (title) => {
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const dispatch = useDispatch();
   
   const user = useSelector((state) => state.client.user);
@@ -81,33 +82,32 @@ const Navbar = () => {
   };
 
   const cartDropdownContainerRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // 1. Eğer dropdown referansı YOKSA veya tıklanan yer dropdown'ın İÇİNDEYSE, HİÇBİR ŞEY YAPMA.
-      if (!cartDropdownContainerRef.current || cartDropdownContainerRef.current.contains(event.target)) {
-        return;
+      if (cartDropdownContainerRef.current && !cartDropdownContainerRef.current.contains(event.target)) {
+        const desktopCartIcon = document.getElementById('cart-icon-button');
+        const mobileCartIcon = document.getElementById('cart-icon-button-mobile');
+        if (
+          !(desktopCartIcon && desktopCartIcon.contains(event.target)) &&
+          !(mobileCartIcon && mobileCartIcon.contains(event.target)) &&
+          isCartOpen
+        ) {
+          setIsCartOpen(false);
+        }
       }
 
-      // 2. Tıklanan yer sepet ikonuysa (masaüstü VEYA mobil), HİÇBİR ŞEY YAPMA.
-      const desktopCartIcon = document.getElementById('cart-icon-button');
-      const mobileCartIcon = document.getElementById('cart-icon-button-mobile');
-
-      if (
-        (desktopCartIcon && desktopCartIcon.contains(event.target)) ||
-        (mobileCartIcon && mobileCartIcon.contains(event.target))
-      ) {
-        return;
-      }
-      
-      // 3. Yukarıdaki durumlar değilse VE dropdown açıksa, dropdown'ı KAPAT.
-      if (isCartOpen) {
-        setIsCartOpen(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        const userMenuButton = document.getElementById('user-menu-button');
+        if (!(userMenuButton && userMenuButton.contains(event.target)) && isUserMenuOpen) {
+          setIsUserMenuOpen(false);
+        }
       }
     };
 
-    if (isCartOpen) {
-      document.addEventListener('click', handleClickOutside); // 'mousedown' yerine 'click'
+    if (isCartOpen || isUserMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
     } else {
       document.removeEventListener('click', handleClickOutside);
     }
@@ -115,7 +115,11 @@ const Navbar = () => {
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [isCartOpen]);
+  }, [isCartOpen, isUserMenuOpen]);
+
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen(prev => !prev);
+  };
 
   return (
     <nav className="bg-slate-800 font-sans fixed top-0 left-0 right-0 z-50 w-full border-b border-slate-700">
@@ -155,21 +159,41 @@ const Navbar = () => {
 
         <div className="hidden lg:flex gap-x-4 items-center text-gray-300 font-bold text-sm">
           {user ? (
-            <>
-              <img
-                src={getGravatarUrl(user.email)}
-                alt={user.name || 'User Avatar'}
-                className="w-8 h-8 rounded-full border-2 border-gray-400"
-              />
-              <span className="text-white">{user.name || 'User'}</span>
-              <button
-                onClick={handleLogout}
-                className="p-2 hover:text-white text-xs bg-red-600 hover:bg-red-700 rounded"
-                title="Logout"
+            <div className="relative" ref={userMenuRef}>
+              <button 
+                id="user-menu-button"
+                onClick={toggleUserMenu} 
+                className="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-slate-700"
               >
-                Logout
+                <img
+                  src={getGravatarUrl(user.email)}
+                  alt={user.name || 'User Avatar'}
+                  className="w-8 h-8 rounded-full border-2 border-gray-400"
+                />
+                <span className="text-white">{user.name || 'User'}</span>
+                <span className={`ml-1 text-xs transform transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : 'rotate-0'}`}>▼</span>
               </button>
-            </>
+              {isUserMenuOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded shadow-lg py-1 z-50">
+                  <Link
+                    to="/orders"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-700 hover:text-white"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  >
+                    Siparişlerim
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-slate-700 hover:text-white"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <Link to="/login" className="flex items-center gap-1 py-2 text-white hover:text-gray-200">
               👤 <span className="ml-1">Login / Register</span>
@@ -194,9 +218,6 @@ const Navbar = () => {
               <CartDropdown isOpen={isCartOpen} toggleDropdown={toggleCartDropdown} />
             </div>
           </div>
-          <Link to="/wishlist" className="flex items-center gap-1 p-2 hover:text-white" aria-label="Wishlist">
-            ❤️ <span className="text-xs text-white">1</span>
-          </Link>
         </div>
 
         <div className="flex lg:hidden items-center gap-x-5 text-white">

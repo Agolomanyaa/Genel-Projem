@@ -16,7 +16,8 @@ import LoginPage from './pages/LoginPage';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute'; // Bu componentin v5 ile uyumlu olduğundan emin olalım
 import ShoppingCartPage from './pages/ShoppingCartPage'; // Bu import doğru
-import OrderPage from './pages/OrderPage'; // Yeni sayfayı import et
+import OrderPage from './pages/OrderPage'; // Checkout sayfası
+import OrderHistoryPage from './pages/OrderHistoryPage'; // YENİ: Sipariş Geçmişi sayfası
 
 function App() {
   const dispatch = useDispatch();
@@ -68,12 +69,14 @@ function App() {
         <Route path="/cart" component={ShoppingCartPage} /> 
 
         {/* Checkout sayfası için Korumalı Rota */}
-        <ProtectedRoute path="/checkout" component={OrderPage} /> {/* Burası ProtectedRoute kullanımına göre değişebilir */}
+        <ProtectedRoute path="/checkout" component={OrderPage} />
+
+        {/* Sipariş Geçmişi sayfası için Korumalı Rota */}
+        <ProtectedRoute path="/orders" component={OrderHistoryPage} /> 
         
-        {/* ProtectedRoute'lar component prop'u ile kalmalı */}
-        <ProtectedRoute path="/orders" component={() => <div>Order History Page (Protected)</div>} />
-        <ProtectedRoute path="/order" component={() => <div>Order Page (Protected)</div>} />
-        <ProtectedRoute path="/order-confirmation" component={() => <div>Order Confirmation Page (Protected)</div>} />
+        {/* Diğer korumalı rotalar (eğer /order ve /order-confirmation farklıysa kalabilirler, değilse temizlenebilirler) */}
+        {/* <ProtectedRoute path="/order" component={() => <div>Order Page (Protected)</div>} /> */}
+        {/* <ProtectedRoute path="/order-confirmation" component={() => <div>Order Confirmation Page (Protected)</div>} /> */}
         
         {/* Eğer hiçbir rota eşleşmezse gösterilecek bir 404 sayfası eklenebilir */}
         {/* <Route component={NotFoundPage} /> */}

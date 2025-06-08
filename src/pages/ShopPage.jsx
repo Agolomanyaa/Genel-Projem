@@ -228,8 +228,8 @@ const ShopPage = () => {
 
   return (
     <MainLayout>
-      {/* Breadcrumb (Aynı kalıyor) */}
-      <section className="bg-lighter-bg py-6 mt-[90px]">
+      {/* Breadcrumb */}
+      <section className="bg-lighter-bg py-6">
          <div className="container mx-auto px-6 flex items-center text-sm">
           {breadcrumbSegments.map((segment, index) => (
             <React.Fragment key={index}>

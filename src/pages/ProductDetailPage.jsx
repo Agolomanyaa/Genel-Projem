@@ -140,7 +140,7 @@ const ProductDetailPage = () => {
 
   return (
     <MainLayout>
-      <section className="bg-lighter-bg py-6 mt-[70px] md:mt-[90px]">
+      <section className="bg-lighter-bg py-6">
         <div className="container mx-auto px-4 sm:px-6 flex items-center flex-wrap">
           <button
             onClick={handleGoBack}

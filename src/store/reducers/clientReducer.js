@@ -1,4 +1,4 @@
-import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE, GET_ADDRESSES_REQUEST, GET_ADDRESSES_SUCCESS, GET_ADDRESSES_FAILURE, ADD_ADDRESS_REQUEST, ADD_ADDRESS_SUCCESS, ADD_ADDRESS_FAILURE, UPDATE_ADDRESS_REQUEST, UPDATE_ADDRESS_SUCCESS, UPDATE_ADDRESS_FAILURE, DELETE_ADDRESS_REQUEST, DELETE_ADDRESS_SUCCESS, DELETE_ADDRESS_FAILURE, AUTH_VERIFY_PENDING, AUTH_VERIFY_SUCCESS, AUTH_VERIFY_FAILURE, GET_CREDIT_CARDS_REQUEST, GET_CREDIT_CARDS_SUCCESS, GET_CREDIT_CARDS_FAILURE, ADD_CREDIT_CARD_REQUEST, ADD_CREDIT_CARD_SUCCESS, ADD_CREDIT_CARD_FAILURE, UPDATE_CREDIT_CARD_REQUEST, UPDATE_CREDIT_CARD_SUCCESS, UPDATE_CREDIT_CARD_FAILURE, DELETE_CREDIT_CARD_REQUEST, DELETE_CREDIT_CARD_SUCCESS, DELETE_CREDIT_CARD_FAILURE, CREATE_ORDER_REQUEST, CREATE_ORDER_SUCCESS, CREATE_ORDER_FAILURE } from '../actions/clientActions';
+import { SET_USER, SET_ROLES, SET_THEME, SET_LANGUAGE, GET_ADDRESSES_REQUEST, GET_ADDRESSES_SUCCESS, GET_ADDRESSES_FAILURE, ADD_ADDRESS_REQUEST, ADD_ADDRESS_SUCCESS, ADD_ADDRESS_FAILURE, UPDATE_ADDRESS_REQUEST, UPDATE_ADDRESS_SUCCESS, UPDATE_ADDRESS_FAILURE, DELETE_ADDRESS_REQUEST, DELETE_ADDRESS_SUCCESS, DELETE_ADDRESS_FAILURE, AUTH_VERIFY_PENDING, AUTH_VERIFY_SUCCESS, AUTH_VERIFY_FAILURE, GET_CREDIT_CARDS_REQUEST, GET_CREDIT_CARDS_SUCCESS, GET_CREDIT_CARDS_FAILURE, ADD_CREDIT_CARD_REQUEST, ADD_CREDIT_CARD_SUCCESS, ADD_CREDIT_CARD_FAILURE, UPDATE_CREDIT_CARD_REQUEST, UPDATE_CREDIT_CARD_SUCCESS, UPDATE_CREDIT_CARD_FAILURE, DELETE_CREDIT_CARD_REQUEST, DELETE_CREDIT_CARD_SUCCESS, DELETE_CREDIT_CARD_FAILURE, CREATE_ORDER_REQUEST, CREATE_ORDER_SUCCESS, CREATE_ORDER_FAILURE, FETCH_ORDERS_REQUEST, FETCH_ORDERS_SUCCESS, FETCH_ORDERS_FAILURE } from '../actions/clientActions';
 
 // Başlangıç Durumu (Initial State)
 const FETCH_STATES = { // Örnek, eğer productReducer'daki gibi merkezi bir yapınız yoksa
@@ -39,6 +39,9 @@ const initialState = {
   createOrderFetchState: FETCH_STATES.NOT_FETCHED,
   createOrderError: null,
   lastOrder: null, // Oluşturulan son sipariş bilgisini tutmak için
+  orders: [], // Başlangıçta boş sipariş listesi
+  fetchOrdersState: FETCH_STATES.NOT_FETCHED,
+  fetchOrdersError: null,
 };
 
 // Client Reducer Fonksiyonu
@@ -256,6 +259,26 @@ const clientReducer = (state = initialState, action) => {
         ...state,
         createOrderFetchState: FETCH_STATES.FAILED,
         createOrderError: action.payload,
+      };
+    case FETCH_ORDERS_REQUEST:
+      return {
+        ...state,
+        fetchOrdersState: FETCH_STATES.FETCHING,
+        fetchOrdersError: null,
+        orders: [], // İstek başlarken mevcut listeyi temizleyebiliriz (isteğe bağlı)
+      };
+    case FETCH_ORDERS_SUCCESS:
+      return {
+        ...state,
+        fetchOrdersState: FETCH_STATES.FETCHED,
+        orders: action.payload, // API'den gelen sipariş listesi
+      };
+    case FETCH_ORDERS_FAILURE:
+      return {
+        ...state,
+        fetchOrdersState: FETCH_STATES.FAILED,
+        fetchOrdersError: action.payload,
+        orders: [], // Hata durumunda listeyi boşalt
       };
     default:
       return state; // Bilinmeyen action tipi için mevcut state'i döndür

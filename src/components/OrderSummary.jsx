@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link, useHistory } from 'react-router-dom'; // Eğer butonlar Link olacaksa
+import { useHistory } from 'react-router-dom'; // Eğer butonlar Link olacaksa
 
 const OrderSummary = () => {
   const { cart } = useSelector((state) => state.shoppingCart);
@@ -22,13 +22,6 @@ const OrderSummary = () => {
 
   return (
     <div className="bg-white p-6 shadow-md rounded-lg border border-gray-200">
-      <button
-        onClick={handleProceedToCheckout} // Güncellenmiş fonksiyonu ata
-        className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md transition duration-150 ease-in-out mb-6"
-      >
-        Sepeti Onayla
-      </button>
-
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Sipariş Özeti</h2>
       
       <div className="space-y-2 mb-4">
@@ -63,7 +56,7 @@ const OrderSummary = () => {
       </div>
 
       <button
-        onClick={handleProceedToCheckout} // Güncellenmiş fonksiyonu ata
+        onClick={handleProceedToCheckout}
         className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-md transition duration-150 ease-in-out"
       >
         Sepeti Onayla

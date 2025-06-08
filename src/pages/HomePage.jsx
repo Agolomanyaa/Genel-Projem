@@ -79,7 +79,7 @@ const HomePage = () => {
 
   return (
     <MainLayout>
-      <div className="mt-[90px]">
+      <div>
         <HeroSection />
         <EditorPicks />
 
