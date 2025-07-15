@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { slugify } from '../utils/slugify';
 
-const ProductCard = ({ product, category }) => {
-  if (!product) {
+const ProductCard = ({ product }) => {
+  if (!product || !product.category) {
     return null;
   }
 
@@ -12,30 +12,17 @@ const ProductCard = ({ product, category }) => {
     images,
     name,
     price,
-    category_id
+    category
   } = product;
 
   const mainImageUrl = (Array.isArray(images) && images.length > 0 && images[0].url) 
                        ? images[0].url 
-                       : 'https://via.placeholder.com/300x375/efefef/999999?text=No+Image';
+                       : `https://via.placeholder.com/300x375/efefef/999999?text=No+Image`;
 
-  const productId = id;
   const productNameSlug = slugify(name);
+  const categorySlug = slugify(category.name);
   
-  const catId = category ? category.id : category_id;
-  const categorySlug = category ? slugify(category.title) : 'unknown-category';
-  
-  const gender = category ? category.gender : 'unisex';
-
-  const productDetailUrl = `/shop/${gender}/${categorySlug}/${catId}/${productNameSlug}/${productId}`;
-
-  console.log('[ProductCard] Preparing URL for Product:', name, '(ID:', id, ')');
-  console.log('[ProductCard] Received Category Object:', category);
-  console.log('[ProductCard] Calculated Gender:', gender);
-  console.log('[ProductCard] Calculated Category Slug:', categorySlug);
-  console.log('[ProductCard] Using Category ID:', catId);
-  console.log('[ProductCard] Calculated Product Name Slug:', productNameSlug);
-  console.log('[ProductCard] --------- Generated productDetailUrl:', productDetailUrl);
+  const productDetailUrl = `/shop/${category.gender}/${categorySlug}/${category.id}/${productNameSlug}/${id}`;
 
   return (
     <Link 
@@ -54,7 +41,7 @@ const ProductCard = ({ product, category }) => {
           {name || 'Product Title'}
       </h5>
       <div className="flex justify-center items-baseline gap-2 font-bold text-base">
-        <span className="text-secondary">${price || '0.00'}</span>
+        <span className="text-secondary">${price ? price.toFixed(2) : '0.00'}</span>
       </div>
     </Link>
   );

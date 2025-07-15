@@ -18,6 +18,7 @@ import ProtectedRoute from './components/ProtectedRoute'; // Bu componentin v5 i
 import ShoppingCartPage from './pages/ShoppingCartPage'; // Bu import doğru
 import OrderPage from './pages/OrderPage'; // Checkout sayfası
 import OrderHistoryPage from './pages/OrderHistoryPage'; // YENİ: Sipariş Geçmişi sayfası
+import AdminPage from './pages/AdminPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -60,19 +61,24 @@ function App() {
         <Route path="/signup" component={SignupPage} />
         <Route path="/login" component={LoginPage} />
 
-        <Route path="/shop/home-living" component={ShopPage} />
+        {/* --- DÜZENLENDİ: SHOP ROTALARI --- */}
+        {/* Rotaların doğru çalışması için daha spesifik olanlar (daha çok segment içerenler) üste gelmeli. */}
+        {/* `/shop/home-living` kaldırıldı çünkü `/shop/:gender` bunu zaten yakalıyor. */}
         <Route path="/shop/:gender/:categorySlug/:categoryId" component={ShopPage} />
         <Route path="/shop/:gender" component={ShopPage} />
         <Route path="/shop" exact component={ShopPage} />
 
         {/* ShoppingCartPage için Route (element yerine component) */}
-        <Route path="/cart" component={ShoppingCartPage} /> 
+        <Route path="/cart" component={ShoppingCartPage} />
 
         {/* Checkout sayfası için Korumalı Rota */}
         <ProtectedRoute path="/checkout" component={OrderPage} />
 
         {/* Sipariş Geçmişi sayfası için Korumalı Rota */}
         <ProtectedRoute path="/orders" component={OrderHistoryPage} /> 
+        
+        {/* Admin sayfası için Rota (şimdilik korumasız) */}
+        <Route path="/admin" component={AdminPage} />
         
         {/* Diğer korumalı rotalar (eğer /order ve /order-confirmation farklıysa kalabilirler, değilse temizlenebilirler) */}
         {/* <ProtectedRoute path="/order" component={() => <div>Order Page (Protected)</div>} /> */}

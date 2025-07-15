@@ -1,31 +1,32 @@
 import axios from 'axios';
 
+const API_BASE_URL = 'http://localhost:8081/api/v1'; // ESKİ ADRESİ BUNUNLA DEĞİŞTİR
+
 // Axios instance oluştur
 const axiosInstance = axios.create({
-  baseURL: 'https://workintech-fe-ecommerce.onrender.com', // Görevde belirtilen base URL
-  timeout: 60000, // İstek zaman aşımı süresini 30 saniyeye çıkaralım
+  baseURL: API_BASE_URL,
+  timeout: 10000, // 10 saniye zaman aşımı
   headers: {
     'Content-Type': 'application/json', // Genellikle JSON gönderip alacağız
     // Gelecekte gerekirse buraya Authorization header'ı gibi başka başlıklar eklenebilir
   }
 });
 
-// --- Axios Request Interceptor - GÜNCELLENDİ ---
+// --- Axios Request Interceptor - NİHAİ SÜRÜM ---
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Önce localStorage'dan token'ı al
-    let token = localStorage.getItem('token');
-
-    // localStorage'da yoksa sessionStorage'dan al
+    // Önce sessionStorage'a bak, eğer orada yoksa localStorage'a bak.
+    // Bu, "Beni Hatırla" seçeneğinin doğru çalışmasını sağlar.
+    let token = sessionStorage.getItem('token');
     if (!token) {
-      token = sessionStorage.getItem('token');
+      token = localStorage.getItem('token');
     }
 
-    // Eğer token varsa ve config.headers varsa
-    if (token && config.headers) {
-      // Authorization başlığını ayarla
-      config.headers['Authorization'] = token;
+    // Eğer token bulunursa, her isteğin header'ına ekle.
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {

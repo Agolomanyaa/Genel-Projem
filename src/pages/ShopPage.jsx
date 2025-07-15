@@ -20,7 +20,7 @@ const ShopPage = () => {
   const routeParams = useParams();
 
   const {
-    productList,
+    products: productList,
     totalProducts,
     productsFetchState,
     productsError,
@@ -61,6 +61,13 @@ const ShopPage = () => {
       limit: limit,
       offset: 0, // Filtreler değiştiğinde her zaman ilk sayfadan başla (currentPage: 1 olacak)
     };
+    if (routeParams.gender) {
+      if (routeParams.gender === 'home-living') {
+        paramsForAPI.gender = 'h';
+      } else {
+        paramsForAPI.gender = routeParams.gender;
+      }
+    }
     if (categoryIdFromStore) paramsForAPI.category = categoryIdFromStore;
     if (sortOptionFromStore) paramsForAPI.sort = sortOptionFromStore;
     if (filterTextFromStore) paramsForAPI.filter = filterTextFromStore;
@@ -70,7 +77,7 @@ const ShopPage = () => {
     console.log('[ShopPage EFFECT2] Filters changed, fetching products from page 1. Params:', paramsForAPI);
     dispatch(fetchProducts(paramsForAPI));
 
-  }, [dispatch, categoryIdFromStore, sortOptionFromStore, filterTextFromStore, limit]);
+  }, [dispatch, categoryIdFromStore, sortOptionFromStore, filterTextFromStore, limit, routeParams.gender]);
   // Bağımlılıklardan currentPage çıkarıldı.
 
   // Sıralama seçenekleri (Aynı kalıyor)
@@ -100,6 +107,13 @@ const ShopPage = () => {
         limit,
         offset: newOffset,
       };
+      if (routeParams.gender) {
+        if (routeParams.gender === 'home-living') {
+          paramsForAPI.gender = 'h';
+        } else {
+          paramsForAPI.gender = routeParams.gender;
+        }
+      }
       if (categoryIdFromStore) paramsForAPI.category = categoryIdFromStore;
       if (sortOptionFromStore) paramsForAPI.sort = sortOptionFromStore;
       if (filterTextFromStore) paramsForAPI.filter = filterTextFromStore;
@@ -220,10 +234,12 @@ const ShopPage = () => {
     }
   }
 
-  // Sonuç sayısı gösterimi (Aynı kalıyor)
+  // <<<< DÜZELTME 2: productList tanımsız olabileceğinden, güvenli bir kontrol ekliyoruz
+  const safeProductList = productList || [];
+  
   const resultsText = totalProducts > 0 
-    ? `Showing ${productList.length} of ${totalProducts} results (Page ${currentPage} of ${totalPages})` 
-    : `Showing ${productList.length} results`;
+    ? `Showing ${safeProductList.length} of ${totalProducts} results (Page ${currentPage} of ${totalPages})` 
+    : `Showing ${safeProductList.length} results`;
 
 
   return (
@@ -281,7 +297,7 @@ const ShopPage = () => {
 
       {/* Ürün Grid'i (Aynı kalıyor) */}
       <div className="container mx-auto px-6 py-10">
-         {productsFetchState === FETCH_STATES.FETCHED && productList.length === 0 && totalProducts > 0 && ( 
+         {productsFetchState === FETCH_STATES.FETCHED && safeProductList.length === 0 && totalProducts > 0 && ( 
           <div className="text-center py-10">
             <p className="text-xl text-gray-700">No products found matching your criteria.</p>
           </div>
@@ -292,10 +308,10 @@ const ShopPage = () => {
             <p className="text-md text-gray-500">Please check back later.</p>
           </div>
         )}
-        {productList.length > 0 && (
+        {safeProductList.length > 0 && (
           <ProductGrid
             title={pageTitle !== 'All Products' && pageTitle !== 'Shop' && !categoryIdFromStore ? pageTitle : ''} 
-            products={productList}
+            products={safeProductList}
             categories={allApiCategories}
           />
         )}

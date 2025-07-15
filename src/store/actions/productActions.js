@@ -37,6 +37,16 @@ export const FETCH_PRODUCT_BY_ID_SUCCESS = 'FETCH_PRODUCT_BY_ID_SUCCESS';
 export const FETCH_PRODUCT_BY_ID_FAILURE = 'FETCH_PRODUCT_BY_ID_FAILURE';
 export const CLEAR_SELECTED_PRODUCT = 'CLEAR_SELECTED_PRODUCT'; // Sayfadan çıkıldığında temizlemek için
 
+// YENİ: Ürün Silme için Action Tipleri
+export const DELETE_PRODUCT_REQUEST = 'DELETE_PRODUCT_REQUEST';
+export const DELETE_PRODUCT_SUCCESS = 'DELETE_PRODUCT_SUCCESS';
+export const DELETE_PRODUCT_FAILURE = 'DELETE_PRODUCT_FAILURE';
+
+// YENİ: Ürün Güncelleme için Action Tipleri
+export const UPDATE_PRODUCT_REQUEST = 'UPDATE_PRODUCT_REQUEST';
+export const UPDATE_PRODUCT_SUCCESS = 'UPDATE_PRODUCT_SUCCESS';
+export const UPDATE_PRODUCT_FAILURE = 'UPDATE_PRODUCT_FAILURE';
+
 // Action Creator Fonksiyonları
 export const setCategoriesRequest = () => ({ type: SET_CATEGORIES_REQUEST });
 export const setCategoriesSuccess = (categories) => ({ type: SET_CATEGORIES_SUCCESS, payload: categories });
@@ -94,10 +104,12 @@ export const fetchProducts = (params = {}) => async (dispatch, getState) => {
   const currentParamsInState = getState().product;
   const finalParams = {
     limit: params.limit !== undefined ? params.limit : currentParamsInState.limit,
-    offset: params.offset !== undefined ? params.offset : currentParamsInState.offset, // Filtre değişince offset sıfırlanacaksa ShopPage'den 0 gönderilmeli
+    offset: params.offset !== undefined ? params.offset : currentParamsInState.offset,
     category: params.category !== undefined ? params.category : currentParamsInState.selectedCategoryId,
     sort: params.sort !== undefined ? params.sort : currentParamsInState.sortOption,
     filter: params.filter !== undefined ? params.filter : currentParamsInState.filterText,
+    gender: params.gender,
+    includeInactive: params.includeInactive,
   };
 
   // Sadece değeri olan parametreleri API'ye gönder
@@ -184,6 +196,86 @@ export const fetchProductById = (productId) => async (dispatch) => {
     // Postman'de 500 hatası alıyorduk, API bu endpoint için sorunlu olabilir.
     // Eğer API /products/:id yerine /product/:id gibi bir şey bekliyorsa, burayı düzeltmek gerekebilir.
     // Şimdilik görevdeki /products/:productId varsayımıyla devam ediyoruz.
+  }
+};
+
+// YENİ: Admin Panelinden Yeni Ürün Oluşturmak İçin Thunk Action (GÜNCELLENDİ)
+export const createProduct = (productData) => async (dispatch) => {
+  console.log('[createProduct] Action dispatched with data:', productData);
+  try {
+    const response = await axiosInstance.post('/products', productData);
+
+    if (response.status === 201) {
+      console.log('[createProduct] Product created successfully:', response.data);
+      // Yönlendirme ve alert kaldırıldı. Bu işlemler artık component seviyesinde yönetiliyor.
+      return true;
+    } else {
+      const errorMessage = `Beklenmedik durum kodu: ${response.status}`;
+      console.error('[createProduct] ERROR:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Ürün oluşturulurken bilinmeyen bir hata oluştu.';
+    console.error('[createProduct] CATCH BLOCK ERROR:', errorMessage, 'Full error object:', error);
+    throw new Error(errorMessage);
+  }
+};
+
+// YENİ: Ürün Silme için Action Creator'lar
+export const deleteProductRequest = () => ({ type: DELETE_PRODUCT_REQUEST });
+export const deleteProductSuccess = (productId) => ({ type: DELETE_PRODUCT_SUCCESS, payload: productId });
+export const deleteProductFailure = (error) => ({ type: DELETE_PRODUCT_FAILURE, payload: error });
+
+// YENİ: Ürün Silmek İçin Thunk Action (GÜNCELLENDİ)
+export const deleteProduct = (productId) => async (dispatch) => {
+  dispatch(deleteProductRequest());
+  try {
+    const response = await axiosInstance.delete(`/products/${productId}`);
+
+    if (response.status === 200 || response.status === 204) {
+      console.log(`[deleteProduct] Product with ID ${productId} deleted successfully.`);
+      dispatch(deleteProductSuccess(productId));
+      // alert kaldırıldı, bildirimler component'e bırakıldı.
+    } else {
+      const errorMessage = `Ürün silinirken beklenmedik bir durum oluştu: ${response.status}`;
+      console.error('[deleteProduct] ERROR:', errorMessage);
+      dispatch(deleteProductFailure(errorMessage));
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Ürün silinirken bir hata oluştu.';
+    console.error(`[deleteProduct] CATCH BLOCK ERROR for productId ${productId}:`, errorMessage, 'Full error object:', error);
+    dispatch(deleteProductFailure(errorMessage));
+    throw new Error(errorMessage);
+  }
+};
+
+// YENİ: Ürün Güncelleme için Action Creator'lar
+export const updateProductRequest = () => ({ type: UPDATE_PRODUCT_REQUEST });
+export const updateProductSuccess = (product) => ({ type: UPDATE_PRODUCT_SUCCESS, payload: product });
+export const updateProductFailure = (error) => ({ type: UPDATE_PRODUCT_FAILURE, payload: error });
+
+// YENİ: Ürün Güncellemek İçin Thunk Action
+export const updateProduct = (productId, productData) => async (dispatch) => {
+  dispatch(updateProductRequest());
+  try {
+    const response = await axiosInstance.put(`/products/${productId}`, productData);
+
+    if (response.status === 200) {
+      console.log(`[updateProduct] Product with ID ${productId} updated successfully.`);
+      dispatch(updateProductSuccess(response.data));
+      alert('Ürün başarıyla güncellendi!');
+      return true; // Başarı durumunu döndür
+    } else {
+      dispatch(updateProductFailure(`Unexpected status: ${response.status}`));
+      alert(`Bir hata oluştu. Status: ${response.status}`);
+      return false;
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Ürün güncellenirken bir hata oluştu.';
+    dispatch(updateProductFailure(errorMessage));
+    alert(`Hata: ${errorMessage}`);
+    return false;
   }
 };
 

@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import md5 from 'blueimp-md5';
 import { FETCH_STATES } from '../store/actions/productActions';
 import CartDropdown from '../components/CartDropdown';
+import { logoutUser } from '../store/actions/clientActions';
 
 const createCategorySlug = (title) => {
   if (!title) return '';
@@ -24,6 +25,7 @@ const Navbar = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const dispatch = useDispatch();
+  const history = useHistory();
   
   const user = useSelector((state) => state.client.user);
   const {
@@ -55,10 +57,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    alert('Logout işlemi için Redux action tanımlanmalı ve token silinmeli.');
-    localStorage.removeItem('token');
-    sessionStorage.removeItem('token');
-    window.location.reload();
+    dispatch(logoutUser(history));
   };
 
   const renderCategoryLinks = (categoryList, genderCode) => {

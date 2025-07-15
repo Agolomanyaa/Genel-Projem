@@ -25,10 +25,13 @@ const createCategorySlug = (title) => {
 
 const HomePage = () => {
   // Ürünleri Redux store'dan al
-  const { productList: allProducts, productsFetchState, productsError } = useSelector((state) => state.product);
+  const { 
+    products: allProducts, 
+    productsFetchState 
+  } = useSelector((state) => state.product);
 
   // Bestseller için örnek: ilk 10 ürünü al
-  const bestsellerProducts = allProducts.slice(0, 10);
+  const bestsellerProducts = (allProducts || []).slice(0, 10);
 
   // Kategorileri Redux store'dan al
   const {
@@ -41,12 +44,12 @@ const HomePage = () => {
   let topCategoriesContent;
 
   if (categoriesFetchState === FETCH_STATES.FETCHING) {
-    topCategoriesContent = <p className="text-center py-4">Loading top categories...</p>;
+    topCategoriesContent = <p className="text-center py-4">Kategoriler Yükleniyor...</p>;
   } else if (categoriesFetchState === FETCH_STATES.FAILED) {
-    topCategoriesContent = <p className="text-center py-4 text-red-500">Error: {categoriesError}</p>;
+    topCategoriesContent = <p className="text-center py-4 text-red-500">Hata: {categoriesError}</p>;
   } else if (categoriesFetchState === FETCH_STATES.FETCHED && categories.length > 0) {
     const sortedCategories = [...categories]
-      .sort((a, b) => b.rating - a.rating)
+      .sort((a, b) => (b.rating || 0) - (a.rating || 0)) // `rating` olmayabilir, güvenli hale getirdik.
       .slice(0, 5);
 
     if (sortedCategories.length > 0) {
@@ -54,16 +57,16 @@ const HomePage = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {sortedCategories.map((category) => (
             <div key={category.id} className="category-item text-center group">
-              <Link to={`/shop/${category.gender}/${createCategorySlug(category.title)}/${category.id}`} className="block">
+              <Link to={`/shop/${category.gender}/${createCategorySlug(category.name)}/${category.id}`} className="block">
                 <div className="aspect-square overflow-hidden rounded-md mb-2 transition-all duration-300 group-hover:shadow-lg">
                   <img 
-                    src={category.img} 
-                    alt={category.title} 
+                    src={category.img || `https://via.placeholder.com/200x200?text=${category.name}`} // `img` olmayabilir, güvenli hale getirdik.
+                    alt={category.name} 
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                   />
                 </div>
                 <h3 className="text-md font-semibold text-gray-800 group-hover:text-primary">
-                  {category.title}
+                  {category.name}
                 </h3>
               </Link>
             </div>
@@ -71,10 +74,10 @@ const HomePage = () => {
         </div>
       );
     } else {
-      topCategoriesContent = <p className="text-center py-4">No top categories to display.</p>;
+      topCategoriesContent = <p className="text-center py-4">Gösterilecek kategori bulunamadı.</p>;
     }
   } else {
-    topCategoriesContent = <p className="text-center py-4">No categories found.</p>;
+    topCategoriesContent = <p className="text-center py-4">Kategori bulunamadı.</p>;
   }
 
   return (
@@ -87,13 +90,20 @@ const HomePage = () => {
         <section className="top-categories-section py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
-              Top Categories
+              Öne Çıkan Kategoriler
             </h2>
             {topCategoriesContent}
           </div>
         </section>
 
-        <ProductGrid title="BESTSELLER PRODUCTS" products={bestsellerProducts} />
+        {/* Ürünler yüklenirken veya hata durumunda farklı bir içerik göster */}
+        {productsFetchState === FETCH_STATES.FETCHING && <p className="text-center py-8">Ürünler Yükleniyor...</p>}
+        {productsFetchState === FETCH_STATES.FETCHED && bestsellerProducts.length > 0 && (
+          <ProductGrid title="ÇOK SATANLAR" products={bestsellerProducts} />
+        )}
+        {productsFetchState === FETCH_STATES.FETCHED && bestsellerProducts.length === 0 && (
+          <p className="text-center py-8">Gösterilecek çok satan ürün bulunamadı.</p>
+        )}
         {/* <FeaturedPosts /> */}
       </div>
     </MainLayout>

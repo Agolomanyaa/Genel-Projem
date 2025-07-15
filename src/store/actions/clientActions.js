@@ -223,6 +223,9 @@ export const loginUser = (credentials, rememberMe, history) => async (dispatch) 
       const { token, ...userData } = response.data;
       console.log("Login successful. Token:", token, "User Data:", userData);
 
+      // Not: Token'ı axios header'ına ekleme işini axiosInstance.js'deki interceptor yaptığı için
+      // burada manuel eklemeyi geri alıyoruz.
+
       // 1. Kullanıcı bilgilerini Redux state'ine kaydet
       dispatch(setUser(userData));
 
@@ -260,45 +263,34 @@ export const verifyToken = () => async (dispatch) => {
   // 1. Oturum doğrulama sürecinin başladığını belirt
   dispatch({ type: AUTH_VERIFY_PENDING });
 
-  let token = localStorage.getItem('token');
-  let tokenSource = 'localStorage';
+  // Not: Token'ı axios header'ına ekleme işini axiosInstance.js'deki interceptor zaten yapıyor.
+  // Bu yüzden burada manuel eklemeye gerek yok. Interceptor, her istekten önce çalışır.
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
   if (!token) {
-    token = sessionStorage.getItem('token');
-    tokenSource = 'sessionStorage';
-  }
-
-  if (!token) {
-    // console.log("No token found. Setting auth status to failure."); // Bu log eklenebilir
-    dispatch({ type: AUTH_VERIFY_FAILURE }); // Token yoksa, doğrulama başarısız.
-    // dispatch(setUser(null)); // AUTH_VERIFY_FAILURE zaten user'ı null yapmalı (reducer'da öyle ayarladık)
+    dispatch({ type: AUTH_VERIFY_FAILURE });
     return;
   }
 
-  console.log(`Token found in ${tokenSource}, attempting verification...`);
+  console.log(`Interceptor will handle the token. Attempting verification...`);
 
   try {
     const response = await axiosInstance.get('/verify');
 
-    if (response.status === 200 && response.data) { // response.data'nın da var olduğunu kontrol et
-      const userData = response.data;
-      console.log("Token verified successfully. User data:", userData);
-      // Kullanıcı verisi ile birlikte başarı durumunu dispatch et
-      dispatch({ type: AUTH_VERIFY_SUCCESS, payload: userData }); 
-      // dispatch(setUser(userData)); // AUTH_VERIFY_SUCCESS zaten user'ı set ediyor (reducer'da)
+    if (response.status === 200 && response.data) {
+      console.log("Token verified successfully. User data:", response.data);
+      dispatch({ type: AUTH_VERIFY_SUCCESS, payload: response.data });
     } else {
       console.warn("Token verification returned unexpected status or no data:", response);
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
       dispatch({ type: AUTH_VERIFY_FAILURE });
-      // dispatch(setUser(null)); // AUTH_VERIFY_FAILURE zaten user'ı null yapmalı
     }
   } catch (error) {
     console.error("Token verification failed:", error.response?.data?.message || error.message);
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     dispatch({ type: AUTH_VERIFY_FAILURE });
-    // dispatch(setUser(null)); // AUTH_VERIFY_FAILURE zaten user'ı null yapmalı
   }
 };
 
@@ -616,6 +608,34 @@ export const fetchOrders = () => async (dispatch) => {
     console.error('[fetchOrders] CATCH ERROR:', errorMessage, error.response || error);
     dispatch({ type: FETCH_ORDERS_FAILURE, payload: errorMessage });
     toast.error(errorMessage);
+  }
+};
+
+// YENİ: --- Thunk Action Creator (Logout İçin) ---
+export const logoutUser = (history) => (dispatch) => {
+  console.log("Logging out user...");
+
+  // 1. Token'ları her yerden temizle
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+
+  // 2. Axios header'ını temizle ki gelecekteki istekler kimliksiz gitsin
+  delete axiosInstance.defaults.headers.common['Authorization'];
+
+  // 3. Redux store'daki kullanıcı verisini temizle
+  dispatch(setUser(null));
+
+  // 4. Alışveriş sepetini temizle (iyi bir pratik)
+  dispatch(clearCart());
+
+  console.log("User data and tokens cleared. Redirecting...");
+
+  // 5. Başarıyla çıkış yapıldığına dair bildirim göster
+  toast.info("Başarıyla çıkış yaptınız.");
+
+  // 6. Kullanıcıyı ana sayfaya yönlendir
+  if (history) {
+    history.push('/');
   }
 };
 

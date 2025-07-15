@@ -21,13 +21,19 @@ import {
   FETCH_PRODUCT_BY_ID_SUCCESS,
   FETCH_PRODUCT_BY_ID_FAILURE,
   CLEAR_SELECTED_PRODUCT,
+  DELETE_PRODUCT_REQUEST,
+  DELETE_PRODUCT_SUCCESS,
+  DELETE_PRODUCT_FAILURE,
+  UPDATE_PRODUCT_REQUEST,
+  UPDATE_PRODUCT_SUCCESS,
+  UPDATE_PRODUCT_FAILURE,
 } from '../actions/productActions';
 
 const initialState = {
   categories: [],
   categoriesFetchState: FETCH_STATES.NOT_FETCHED,
   categoriesError: null,
-  productList: [],
+  products: [],
   totalProducts: 0,
   productsFetchState: FETCH_STATES.NOT_FETCHED,
   productsError: null,
@@ -73,7 +79,7 @@ const productReducer = (state = initialState, action) => {
     case SET_PRODUCTS_SUCCESS:
       return {
         ...state,
-        productList: action.payload.products,
+        products: action.payload.products,
         totalProducts: action.payload.total,
         productsFetchState: FETCH_STATES.FETCHED,
       };
@@ -159,6 +165,36 @@ const productReducer = (state = initialState, action) => {
         selectedProductFetchState: FETCH_STATES.NOT_FETCHED,
         selectedProductError: null,
       };
+
+    case DELETE_PRODUCT_REQUEST:
+      return state;
+    
+    case DELETE_PRODUCT_SUCCESS:
+      return {
+        ...state,
+        products: state.products.filter(p => p.id !== action.payload),
+        totalProducts: state.totalProducts - 1,
+      };
+
+    case DELETE_PRODUCT_FAILURE:
+      console.error("Product deletion failed:", action.payload);
+      return state;
+
+    case UPDATE_PRODUCT_REQUEST:
+      return state; // Loading state eklenebilir
+
+    case UPDATE_PRODUCT_SUCCESS:
+      return {
+        ...state,
+        // Güncellenen ürünü bul ve listedeki halini yenisiyle değiştir
+        products: state.products.map(p => 
+          p.id === action.payload.id ? action.payload : p
+        ),
+      };
+
+    case UPDATE_PRODUCT_FAILURE:
+      console.error("Product update failed:", action.payload);
+      return state;
 
     default:
       return state;
