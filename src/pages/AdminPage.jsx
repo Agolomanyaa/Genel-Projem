@@ -6,13 +6,15 @@ import AdminProductList from '../components/AdminProductList';
 import { toast } from 'react-toastify';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
+const DEFAULT_SIZES = ['S', 'M', 'L', 'XL'];
+
 const AdminPage = () => {
   const dispatch = useDispatch();
   const { categories, products, loading, error } = useSelector(state => state.product);
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm({
     defaultValues: {
       imageUrls: [{ url: '' }],
-      variants: [{ color: '', size: '', stock: 0 }] // Varyantlar için varsayılan değer
+      variants: DEFAULT_SIZES.map(size => ({ color: '', size, stock: 0 }))
     }
   });
 
@@ -53,18 +55,18 @@ const AdminPage = () => {
         price: parseFloat(data.price),
         categoryId: parseInt(data.categoryId, 10),
         imageUrls: formattedImageUrls,
-        variants: formattedVariants, // Stok yerine varyantları gönderiyoruz
+        variants: formattedVariants,
       };
 
       await dispatch(createProduct(productData));
       toast.success('Ürün başarıyla oluşturuldu!');
-      reset({ // Formu varsayılan değerlere sıfırla
+      reset({
         name: '',
         description: '',
         price: '',
         categoryId: '',
         imageUrls: [{ url: '' }],
-        variants: [{ color: '', size: '', stock: 0 }]
+        variants: DEFAULT_SIZES.map(size => ({ color: '', size, stock: 0 }))
       });
       dispatch(fetchProducts({ limit: 100, offset: 0, includeInactive: true }));
     } catch (error) {
@@ -107,13 +109,13 @@ const AdminPage = () => {
             </div>
 
             <div className="border-t pt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Ürün Varyantları</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bedenler</label>
               <div className="space-y-3">
                 {variantFields.map((item, index) => (
                   <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                     <input {...register(`variants.${index}.color`, { required: true })} placeholder="Renk" className="col-span-4 border p-2 rounded-md" />
                     <input {...register(`variants.${index}.size`, { required: true })} placeholder="Beden" className="col-span-3 border p-2 rounded-md" />
-                    <input type="number" {...register(`variants.${index}.stock`, { required: true, valueAsNumber: true })} placeholder="Stok" className="col-span-3 border p-2 rounded-md" />
+                    <input type="number" {...register(`variants.${index}.stock`, { required: true, valueAsNumber: true, min: 0 })} placeholder="Stok" className="col-span-3 border p-2 rounded-md" />
                     <button type="button" onClick={() => removeVariant(index)} className="col-span-2 p-2 text-red-600 hover:text-red-800 flex justify-center">
                       <FaTrash />
                     </button>
@@ -121,7 +123,7 @@ const AdminPage = () => {
                 ))}
               </div>
               <button type="button" onClick={() => appendVariant({ color: '', size: '', stock: 0 })} className="mt-3 flex items-center gap-2 text-sm text-primary hover:text-primary-dark font-semibold">
-                <FaPlus /> Varyant Ekle
+                <FaPlus /> Beden Ekle
               </button>
             </div>
             
