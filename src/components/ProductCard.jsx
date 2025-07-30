@@ -1,49 +1,51 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { slugify } from '../utils/slugify';
+import { FaShoppingCart, FaHeart, FaSearch } from 'react-icons/fa';
 
 const ProductCard = ({ product }) => {
+  // Eğer ürün bilgisi yoksa veya kategori bilgisi eksikse kartı render etme
   if (!product || !product.category) {
     return null;
   }
 
-  const { 
-    id,
-    images,
-    name,
-    price,
-    category
-  } = product;
-
-  const mainImageUrl = (Array.isArray(images) && images.length > 0 && images[0].url) 
-                       ? images[0].url 
-                       : `https://via.placeholder.com/300x375/efefef/999999?text=No+Image`;
-
-  const productNameSlug = slugify(name);
-  const categorySlug = slugify(category.name);
-  
-  const productDetailUrl = `/shop/${category.gender}/${categorySlug}/${category.id}/${productNameSlug}/${id}`;
+  // Her kartın kendi ürün bilgisiyle doğru linki oluşturmasını sağlıyoruz.
+  const productUrl = `/shop/${product.category.gender}/${product.category.name.toLowerCase().replace(/ /g, '-')}/${product.category.id}/${product.name.toLowerCase().replace(/ /g, '-')}/${product.id}`;
+  const imageUrl = product.images && product.images.length > 0 ? product.images[0].url : "https://picsum.photos/400/500";
 
   return (
-    <Link 
-      to={productDetailUrl}
-      className="block group text-center cursor-pointer"
-    >
-      <div className="relative overflow-hidden mb-4 aspect-[3/4] bg-gray-100 rounded">
-        <img
-          src={mainImageUrl}
-          alt={name || 'Product Image'}
-          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-          loading="lazy"
-        />
+    <div className="group/card relative flex flex-col items-center text-center font-bold shadow-md rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+      <Link to={productUrl} className="w-full">
+        <div className="relative w-full pb-[125%] overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110"
+          />
+        </div>
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover/card:bg-opacity-20 transition-all duration-300"></div>
+      </Link>
+
+      <div className="p-4 bg-white w-full flex flex-col items-center flex-grow">
+        <h5 className="text-md text-dark-text mb-2">{product.name}</h5>
+        <a href="#" className="text-sm text-second-text mb-2 hover:text-primary">{product.category.name}</a>
+        <div className="flex gap-x-2">
+          <h5 className="text-md text-muted-text line-through">${(product.price * 1.15).toFixed(2)}</h5>
+          <h5 className="text-md text-secondary-color">${product.price.toFixed(2)}</h5>
+        </div>
       </div>
-      <h5 className="text-base font-bold text-dark-text mb-2 h-12 line-clamp-2 group-hover:text-primary transition-colors duration-200">
-          {name || 'Product Title'}
-      </h5>
-      <div className="flex justify-center items-baseline gap-2 font-bold text-base">
-        <span className="text-secondary">${price ? price.toFixed(2) : '0.00'}</span>
+      
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex items-center justify-center gap-x-2 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
+            <FaShoppingCart />
+          </button>
+          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
+            <FaHeart />
+          </button>
+          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
+            <FaSearch />
+          </button>
       </div>
-    </Link>
+    </div>
   );
 };
 

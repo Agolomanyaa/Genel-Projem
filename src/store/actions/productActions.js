@@ -1,5 +1,6 @@
 // src/store/actions/productActions.js
 import axiosInstance from "../../api/axiosInstance";
+// import { API_BASE_URL } from '../../api/api'; // BU SATIRI SİL VEYA YORUMA AL
 
 // Fetch State Tipleri
 export const FETCH_STATES = {
@@ -105,6 +106,7 @@ export const fetchProducts = (params = {}) => async (dispatch, getState) => {
   const finalParams = {
     limit: params.limit !== undefined ? params.limit : currentParamsInState.limit,
     offset: params.offset !== undefined ? params.offset : currentParamsInState.offset,
+    // BU SATIR DEĞİŞTİ: `categoryId` yerine `category` kullanılıyor
     category: params.category !== undefined ? params.category : currentParamsInState.selectedCategoryId,
     sort: params.sort !== undefined ? params.sort : currentParamsInState.sortOption,
     filter: params.filter !== undefined ? params.filter : currentParamsInState.filterText,
@@ -283,3 +285,21 @@ export const updateProduct = (productId, productData) => async (dispatch) => {
 // T14 ile 'SET_FILTER_TEXT' ve 'filterText' state'ini daha spesifik olarak ekledik.
 // Eğer eski 'SET_FILTER' ve 'filter' artık kullanılmıyorsa, karışıklığı önlemek için kaldırılabilir.
 // Şimdilik bu kodda eski 'SET_FILTER' action creator'ı bulunmuyor.
+
+// YENİ EYLEM
+export const fetchCategoriesForForm = () => async (dispatch) => {
+  dispatch({ type: SET_CATEGORIES_REQUEST });
+  try {
+    // API.get yerine axiosInstance.get kullan
+    const response = await axiosInstance.get('/categories/form-list'); 
+    if (response.status === 200 && Array.isArray(response.data)) {
+      dispatch({ type: SET_CATEGORIES_SUCCESS, payload: response.data });
+    } else {
+      throw new Error('Kategorileri formatlı çekerken bir sorun oluştu.');
+    }
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Kategoriler yüklenemedi.';
+    dispatch({ type: SET_CATEGORIES_FAILURE, payload: errorMessage });
+    // toast.error(errorMessage); // toastr bildirimleri component seviyesinde yönetilirse daha iyi olur.
+  }
+};

@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { updateProduct } from '../store/actions/productActions';
 
-const EditProductModal = ({ product, onClose, onSave }) => {
+const EditProductModal = ({ product, isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const { categories } = useSelector(state => state.product);
 
   const { register, control, handleSubmit, reset } = useForm();
@@ -26,11 +28,14 @@ const EditProductModal = ({ product, onClose, onSave }) => {
         description: product.description,
         price: product.price,
         categoryId: product.category.id,
+        // --- DEĞİŞİKLİK BURADA ---
+        // Formu doldururken `product.active` kullanıyoruz.
+        active: product.active,
         images: product.images?.length > 0 ? product.images.map(img => ({ url: img.url })) : [{ url: '' }],
         variants: product.variants?.length > 0 ? product.variants.map(v => ({ color: v.color, size: v.size, stock: v.stock })) : [{ color: '', size: '', stock: 0 }]
       });
     }
-  }, [product, reset]);
+  }, [product, reset, isOpen]);
 
   const onFormSubmit = (data) => {
     const formattedImageUrls = data.images.map(item => item.url).filter(url => url.trim() !== '');
@@ -53,13 +58,24 @@ const EditProductModal = ({ product, onClose, onSave }) => {
       description: data.description,
       price: parseFloat(data.price),
       categoryId: parseInt(data.categoryId),
+      // --- DEĞİŞİKLİK BURADA ---
+      // Backend'e gönderilen veriye `active` alanını ekliyoruz.
+      active: data.active,
       imageUrls: formattedImageUrls,
       variants: formattedVariants,
     };
-    onSave(product.id, payload);
+    
+    dispatch(updateProduct(product.id, payload))
+      .then(() => {
+        toast.success("Ürün başarıyla güncellendi.");
+        onClose();
+      })
+      .catch(err => {
+        toast.error(`Güncelleme hatası: ${err.message}`);
+      });
   };
 
-  if (!product) return null;
+  if (!isOpen || !product) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
@@ -85,12 +101,21 @@ const EditProductModal = ({ product, onClose, onSave }) => {
               <div>
                 <label htmlFor="edit-category" className="block text-gray-700 font-bold mb-2">Kategori</label>
                 <select id="edit-category" {...register("categoryId")} className="w-full p-3 border border-gray-300 rounded-md bg-white" required>
-                  {categories.map(cat => (<option key={cat.id} value={cat.id}>{`[${cat.gender.toUpperCase()}] - ${cat.name}`}</option>))}
+                  {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.formattedName}</option>))}
                 </select>
               </div>
            </div>
 
-           {/* YENİ: Varyantları Düzenleme Bölümü */}
+            {/* --- YENİ EKLENEN ALAN --- */}
+            <div className="mb-4">
+                <label htmlFor="edit-active" className="flex items-center cursor-pointer">
+                    <input type="checkbox" id="edit-active" {...register("active")} className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"/>
+                    <span className="ml-2 text-gray-700 font-bold">Ürün Aktif</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1">Bu kutucuk işaretli ise ürün sitede görünür.</p>
+            </div>
+
+
            <div className="mb-4 p-4 border rounded-md">
              <label className="block text-gray-700 font-bold mb-2">Ürün Varyantları</label>
              <div className="space-y-3">
