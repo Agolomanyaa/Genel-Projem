@@ -1,15 +1,41 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../store/actions/shoppingCartActions';
 import { FaShoppingCart, FaHeart, FaSearch } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 const ProductCard = ({ product }) => {
-  // Eğer ürün bilgisi yoksa veya kategori bilgisi eksikse kartı render etme
+  const dispatch = useDispatch();
+
   if (!product || !product.category) {
     return null;
   }
 
-  // Her kartın kendi ürün bilgisiyle doğru linki oluşturmasını sağlıyoruz.
-  const productUrl = `/shop/${product.category.gender}/${product.category.name.toLowerCase().replace(/ /g, '-')}/${product.category.id}/${product.name.toLowerCase().replace(/ /g, '-')}/${product.id}`;
+  const handleAddToCart = (e) => {
+    e.stopPropagation(); // Link'e tıklanmasını engelle
+    e.preventDefault(); // Varsayılan davranışı engelle
+
+    // Stokta olan ilk varyantı bul
+    const firstAvailableVariant = product.variants?.find(v => v.stock > 0);
+
+    if (firstAvailableVariant) {
+      const productToAdd = {
+        id: product.id,
+        variantId: firstAvailableVariant.id,
+        name: `${product.name} (${firstAvailableVariant.color} / ${firstAvailableVariant.size})`,
+        price: product.price,
+        imageUrl: product.images?.[0]?.url || '',
+        stock: firstAvailableVariant.stock,
+      };
+      dispatch(addToCart(productToAdd, 1));
+      toast.success(`${productToAdd.name} sepete eklendi!`);
+    } else {
+      toast.warn('Bu ürünün stokları tükenmiştir.');
+    }
+  };
+
+  const productUrl = `/product/${product.id}`;
   const imageUrl = product.images && product.images.length > 0 ? product.images[0].url : "https://picsum.photos/400/500";
 
   return (
@@ -27,7 +53,7 @@ const ProductCard = ({ product }) => {
 
       <div className="p-4 bg-white w-full flex flex-col items-center flex-grow">
         <h5 className="text-md text-dark-text mb-2">{product.name}</h5>
-        <a href="#" className="text-sm text-second-text mb-2 hover:text-primary">{product.category.name}</a>
+        <Link to={`/shop?category=${product.category.id}`} className="text-sm text-second-text mb-2 hover:text-primary">{product.category.name}</Link>
         <div className="flex gap-x-2">
           <h5 className="text-md text-muted-text line-through">${(product.price * 1.15).toFixed(2)}</h5>
           <h5 className="text-md text-secondary-color">${product.price.toFixed(2)}</h5>
@@ -35,15 +61,19 @@ const ProductCard = ({ product }) => {
       </div>
       
       <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex items-center justify-center gap-x-2 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
+          <button 
+            onClick={handleAddToCart}
+            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors"
+            title="Add to Cart"
+          >
             <FaShoppingCart />
           </button>
           <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
             <FaHeart />
           </button>
-          <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
+          <Link to={productUrl} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-dark-text hover:bg-primary hover:text-white transition-colors">
             <FaSearch />
-          </button>
+          </Link>
       </div>
     </div>
   );

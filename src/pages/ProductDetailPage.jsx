@@ -13,6 +13,23 @@ import { addToCart } from '../store/actions/shoppingCartActions';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
+// --- YENİ ÇEVİRMEN FONKSİYONU ---
+// Backend'den gelen Türkçe renk isimlerini CSS'in anlayacağı dile çevirir.
+const mapColorNameToCss = (colorName = '') => {
+  if (!colorName) return 'transparent'; // Eğer renk adı yoksa şeffaf yap
+  const lowerColor = colorName.toLowerCase();
+  switch (lowerColor) {
+    case 'kırmızı': return 'red';
+    case 'siyah': return 'black';
+    case 'beyaz': return 'white';
+    case 'mavi': return 'blue';
+    case 'açık mavi': return '#add8e6'; // lightblue
+    // Gelecekte eklenebilecek diğer renkler buraya gelebilir
+    default: return lowerColor; // Eşleşme yoksa, adı doğrudan kullanmayı dene (örn: 'green')
+  }
+};
+
+
 const ProductDetailPage = () => {
   const { productId } = useParams();
   const dispatch = useDispatch();
@@ -23,6 +40,11 @@ const ProductDetailPage = () => {
   const [mainImageIndex, setMainImageIndex] = useState(0); // Hangi resmin ana resim olduğunu takip eder
   const [isLightboxOpen, setIsLightboxOpen] = useState(false); // Büyüyen galeri açık mı?
   const [isSizeChartOpen, setIsSizeChartOpen] = useState(false); // Yeni state
+
+  // --- YENİ STATE'LER ---
+  // Hangi renk ve bedenin seçili olduğunu takip etmek için.
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
 
   // Beden Tablosu Linkleri
   const sizeChartLinks = {
@@ -39,26 +61,50 @@ const ProductDetailPage = () => {
       dispatch(clearSelectedProduct());
     };
   }, [dispatch, productId]);
+  
+  // --- YENİ useEffect ---
+  // Ürün yüklendiğinde, mevcut ilk rengi ve bedeni otomatik seçili hale getir.
+  useEffect(() => {
+    if (selectedProduct && selectedProduct.variants && selectedProduct.variants.length > 0) {
+      const firstVariant = selectedProduct.variants[0];
+      setSelectedColor(firstVariant.color);
+      // İlk başta hiçbir beden seçili olmasın.
+      setSelectedSize(null);
+    }
+  }, [selectedProduct]);
+
+  // --- GÜNCELLENEN SEPETE EKLEME FONKSİYONU ---
+  const handleAddToCart = () => {
+    // Önce bir beden seçilmiş mi diye kontrol et.
+    if (!selectedSize) {
+      toast.warn('Lütfen bir beden seçiniz.');
+      return;
+    }
+    
+    // Seçilen renk ve bedene uyan varyantı bul.
+    const selectedVariant = selectedProduct.variants.find(
+      v => v.color === selectedColor && v.size === selectedSize
+    );
+
+    // Varyant bulunduysa ve stokta varsa sepete ekle.
+    if (selectedVariant && selectedVariant.stock > 0) {
+      const productToAdd = {
+        id: selectedProduct.id,
+        variantId: selectedVariant.id,
+        name: `${selectedProduct.name} (${selectedVariant.color} / ${selectedVariant.size})`,
+        price: selectedProduct.price,
+        imageUrl: selectedProduct.images?.[0]?.url || '',
+        stock: selectedVariant.stock,
+      };
+      dispatch(addToCart(productToAdd, 1));
+      toast.success(`${productToAdd.name} sepete eklendi!`);
+    } else {
+      toast.error('Bu ürün bu bedende stokta olmadığı için sepete eklenemedi.');
+    }
+  };
 
   const handleGoBack = () => history.goBack();
 
-  const handleAddToCart = () => {
-    if (selectedProduct && selectedProduct.stock > 0) {
-      const productToAdd = {
-        id: selectedProduct.id,
-        name: selectedProduct.name,
-        price: selectedProduct.price,
-        imageUrl: selectedProduct.images?.[0]?.url || '',
-        stock: selectedProduct.stock,
-      };
-      // Referans tasarımda adet seçimi yok, o yüzden 1 adet ekliyoruz.
-      dispatch(addToCart(productToAdd, 1)); 
-      toast.success(`${selectedProduct.name} sepete eklendi!`);
-    } else {
-      toast.error('Ürün stokta olmadığı için sepete eklenemedi.');
-    }
-  };
-  
   // --- Yüklenme ve Hata Durumları ---
   if (selectedProductFetchState === FETCH_STATES.FETCHING) {
     return (
@@ -83,10 +129,16 @@ const ProductDetailPage = () => {
   }
 
   // --- Ürün Verilerini Hazırlama ---
-  const { name, description, price, images, category, stock } = selectedProduct;
+  const { name, description, price, images, category, variants } = selectedProduct;
   const productImages = Array.isArray(images) && images.length > 0 ? images.map(img => ({ src: img.url })) : [{ src: 'https://via.placeholder.com/600x600?text=No+Image' }];
   const gender = category?.gender === 'k' ? 'kadın' : (category?.gender === 'e' ? 'erkek' : null);
   const sizeChartLink = gender ? sizeChartLinks[gender] : null;
+
+  // --- YENİ YARDIMCI VERİLER ---
+  // Mevcut renkleri ve o renge ait bedenleri bul.
+  const availableColors = [...new Set(variants.map(v => v.color))];
+  const availableSizesForSelectedColor = variants.filter(v => v.color === selectedColor);
+  const selectedVariantStock = variants.find(v => v.color === selectedColor && v.size === selectedSize)?.stock || 0;
 
   return (
     <MainLayout>
@@ -148,10 +200,25 @@ const ProductDetailPage = () => {
             
             {/* Renk ve Beden Tablosu Alanı */}
             <div className="flex justify-between items-center mb-4">
-               <div >
+               <div>
                   <h3 className="text-sm font-semibold mb-2">Renk</h3>
-                  <div className="w-8 h-8 rounded border-2 border-primary p-0.5">
-                    <div className="w-full h-full rounded-sm bg-black"></div>
+                  {/* --- RENK SEÇENEKLERİ DİNAMİK OLARAK GELDİ --- */}
+                  <div className="flex gap-2">
+                    {availableColors.map(color => (
+                        <button 
+                            key={color}
+                            onClick={() => { setSelectedColor(color); setSelectedSize(null); }}
+                            className={`w-8 h-8 rounded-full border-2 p-0.5 ${selectedColor === color ? 'border-primary' : 'border-gray-300'}`}
+                            title={color}
+                        >
+                          {/* --- DÜZELTME BURADA --- */}
+                          {/* Renk kutucuğunun arkaplanını çevirmen fonksiyonuyla ayarlıyoruz. */}
+                          <div 
+                            className="w-full h-full rounded-full border border-gray-200" 
+                            style={{ backgroundColor: mapColorNameToCss(color) }}
+                          ></div>
+                        </button>
+                    ))}
                   </div>
                </div>
                {sizeChartLink && (
@@ -161,24 +228,38 @@ const ProductDetailPage = () => {
                )}
             </div>
 
-            {/* Beden Seçenekleri (Şimdilik statik, görsel amaçlı) */}
+            {/* --- BEDEN SEÇENEKLERİ DİNAMİK OLARAK GELDİ --- */}
             <div>
               <h3 className="text-sm font-semibold mb-2">Beden</h3>
               <div className="flex flex-wrap gap-2">
-                {['30', '31', '32', '33', '34', '36', '38', '40', '42'].map(size => (
-                  <button key={size} className="px-4 py-2 border rounded hover:border-black transition">{size}</button>
+                {availableSizesForSelectedColor.map(variant => (
+                  <button 
+                    key={variant.size} 
+                    onClick={() => setSelectedSize(variant.size)}
+                    disabled={variant.stock === 0}
+                    className={`px-4 py-2 border rounded transition 
+                      ${selectedSize === variant.size ? 'bg-primary text-white border-primary' : 'hover:border-black'}
+                      ${variant.stock === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed line-through' : ''}
+                    `}
+                  >
+                    {variant.size}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Sepete Ekle ve Favori Butonları */}
+            {/* --- SEPETE EKLE BUTONU DİNAMİK OLARAK GÜNCELLENDİ --- */}
             <div className="flex items-stretch gap-3 mt-8">
               <button
                 onClick={handleAddToCart}
-                disabled={stock === 0}
+                disabled={!selectedSize || selectedVariantStock === 0}
                 className="flex-grow bg-black text-white font-bold py-3 px-8 rounded hover:bg-gray-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
-                {stock > 0 ? 'Sepete Ekle' : 'Stokta Yok'}
+                {!selectedSize
+                  ? 'Beden Seçiniz'
+                  : selectedVariantStock > 0
+                    ? 'Sepete Ekle'
+                    : 'Stokta Yok'}
               </button>
               <button className="px-4 border border-gray-300 rounded text-gray-700 hover:border-black flex items-center justify-center">
                 <FaRegHeart size={20} />

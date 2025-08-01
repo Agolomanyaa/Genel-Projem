@@ -250,11 +250,13 @@ const OrderPage = () => {
       order_date: new Date().toISOString(),
       ...cardDetailsForOrder,
       price: calculatedCartTotal,
-      products: cart.map(item => ({
-        product_id: item.product.id,
-        count: item.count,
-        detail: `${item.product.name} - ${item.product.description ? item.product.description.substring(0, 30) : 'Detay Yok'}...` 
-      })),
+      products: cart.map(item => {
+        return {
+          variantId: item.product.variantId,
+          count: item.count,
+          detail: `${item.product.name} - ${item.product.description ? item.product.description.substring(0, 30) : 'Detay Yok'}...`
+        };
+      }),
     };
 
     console.log("Oluşturulan Sipariş Detayları:", orderDetails);

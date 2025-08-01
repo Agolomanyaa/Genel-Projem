@@ -26,7 +26,6 @@ const Navbar = () => {
         return cart.reduce((total, item) => total + item.count, 0);
     }, [cart]);
 
-    // --- BU BÖLÜM TAMAMEN GÜNCELLENDİ ---
     const hierarchicalCategories = useMemo(() => {
         if (categoriesFetchState !== FETCH_STATES.FETCHED || !apiCategories || apiCategories.length === 0) {
             return [];
@@ -40,11 +39,9 @@ const Navbar = () => {
         });
 
         Object.values(categoryMap).forEach(category => {
-            // parentId'yi kontrol et
             if (category.parentId && categoryMap[category.parentId]) {
                 categoryMap[category.parentId].children.push(category);
             } 
-            // parentId yoksa, ana kategoridir
             else if (!category.parentId) {
                 rootCategories.push(category);
             }
@@ -52,7 +49,6 @@ const Navbar = () => {
 
         return rootCategories;
     }, [apiCategories, categoriesFetchState]);
-    // --- GÜNCELLEME BİTTİ ---
 
     const getGravatarUrl = (email, size = 30) => {
         if (!email) return `https://www.gravatar.com/avatar/?d=mp&s=${size}`;
@@ -63,25 +59,6 @@ const Navbar = () => {
     const handleLogout = () => {
         dispatch(logoutUser(history));
     };
-    
-    // ... dosyanın geri kalanı önceki verdiğim doğru versiyon ile aynı ...
-    // ... kopyala-yapıştır yapabilirsin ...
-    
-    const renderSubCategoryLinks = (subCategoryList) => {
-        if (!subCategoryList || subCategoryList.length === 0) {
-            return null;
-        }
-        return subCategoryList.map((category) => (
-            <Link
-                key={category.id}
-                to={`/shop?category=${category.id}`}
-                className="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-700 hover:text-white"
-                onClick={() => setIsMobileMenuOpen(false)}
-            >
-                {category.name}
-            </Link>
-        ));
-    };
 
     const toggleCartDropdown = () => {
         setIsCartOpen(prev => !prev);
@@ -90,37 +67,38 @@ const Navbar = () => {
     const cartDropdownContainerRef = useRef(null);
     const userMenuRef = useRef(null);
 
+    // --- TEMİZLENMİŞ VE SAĞLAMLAŞTIRILMIŞ useEffect ---
     useEffect(() => {
         const handleClickOutside = (event) => {
+            // Sepet Dropdown Kontrolü
             if (cartDropdownContainerRef.current && !cartDropdownContainerRef.current.contains(event.target)) {
-                const desktopCartIcon = document.getElementById('cart-icon-button');
-                const mobileCartIcon = document.getElementById('cart-icon-button-mobile');
-                if (
-                    !(desktopCartIcon && desktopCartIcon.contains(event.target)) &&
-                    !(mobileCartIcon && mobileCartIcon.contains(event.target)) &&
-                    isCartOpen
-                ) {
+                // Tıklanan yerin sepet ikonu olup olmadığını da kontrol et, eğer ikonsa kapatma.
+                const desktopIcon = document.getElementById('cart-icon-button');
+                const mobileIcon = document.getElementById('cart-icon-button-mobile');
+                if (!desktopIcon?.contains(event.target) && !mobileIcon?.contains(event.target)) {
                     setIsCartOpen(false);
                 }
             }
+
+            // Kullanıcı Menüsü Kontrolü
             if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
                 const userMenuButton = document.getElementById('user-menu-button');
-                if (!(userMenuButton && userMenuButton.contains(event.target)) && isUserMenuOpen) {
-                    setIsUserMenuOpen(false);
+                if (!userMenuButton?.contains(event.target)) {
+                   setIsUserMenuOpen(false);
                 }
             }
         };
 
+        // Sadece bir menü açıksa dinleyiciyi ekle
         if (isCartOpen || isUserMenuOpen) {
-            document.addEventListener('click', handleClickOutside);
-        } else {
-            document.removeEventListener('click', handleClickOutside);
+            document.addEventListener('mousedown', handleClickOutside);
         }
 
+        // Temizleme fonksiyonu: component DOM'dan kaldırıldığında veya effect yeniden çalıştığında dinleyiciyi kaldır.
         return () => {
-            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isCartOpen, isUserMenuOpen]);
+    }, [isCartOpen, isUserMenuOpen]); // Sadece menülerin açık/kapalı durumu değiştiğinde bu effect'i yeniden çalıştır.
 
     const toggleUserMenu = () => {
         setIsUserMenuOpen(prev => !prev);
@@ -139,7 +117,6 @@ const Navbar = () => {
                         <button className="hover:text-white flex items-center">
                             Shop <span className="ml-1 text-xs">▼</span>
                         </button>
-                        {/* BU DIV'I GÜNCELLE */}
                         <div className="absolute top-full bg-slate-800 border border-slate-700 rounded shadow-lg p-4 min-w-max opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible flex flex-row gap-4">
                             {categoriesFetchState === FETCH_STATES.FETCHING && <p className="px-4 py-2 text-sm text-gray-400">Loading...</p>}
                             {categoriesFetchState === FETCH_STATES.FAILED && <p className="px-4 py-2 text-sm text-red-400">Error: {categoriesError}</p>}

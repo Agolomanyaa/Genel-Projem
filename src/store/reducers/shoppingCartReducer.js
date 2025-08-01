@@ -1,130 +1,91 @@
-import {
-  ADD_TO_CART,
-  REMOVE_FROM_CART,
-  UPDATE_CART_ITEM_COUNT,
-  CLEAR_CART,
-  TOGGLE_PRODUCT_CHECKED,
-  LOAD_CART_FROM_STORAGE,
-  // TOGGLE_CART_ITEM_CHECKED, // Şimdilik kullanmıyoruz
-} from '../actions/shoppingCartActions';
+import { ADD_TO_CART, REMOVE_FROM_CART, UPDATE_CART_ITEM_COUNT, CLEAR_CART, LOAD_CART_FROM_STORAGE } from "../actions/shoppingCartActions";
 
-// Başlangıç Durumu (Initial State)
 const initialState = {
-  cart: [], // { product: { id, name, price, images... }, count: 1, checked: true } formatında objeler içerecek
-  // Belki toplam tutar, toplam ürün sayısı gibi state'ler de burada tutulabilir
-  // ama bunlar genellikle sepet içeriğinden türetilir (selector ile).
+  cart: [],
 };
 
-// Helper function to save cart to localStorage
+// Yardımcı fonksiyon: Sepeti localStorage'a kaydeder.
 const saveCartToLocalStorage = (cart) => {
   try {
-    const serializedCart = JSON.stringify(cart);
-    localStorage.setItem('cart', serializedCart);
+    const serializableCart = JSON.stringify(cart);
+    localStorage.setItem('shoppingCart', serializableCart);
   } catch (e) {
-    console.error("Could not save cart to localStorage", e);
+    console.error("Could not save cart to local storage", e);
   }
 };
 
-// ShoppingCart Reducer Fonksiyonu
 const shoppingCartReducer = (state = initialState, action) => {
-  let newState; // Güncellenmiş state'i tutmak için
-
   switch (action.type) {
-    case LOAD_CART_FROM_STORAGE:
-      newState = {
-        ...state,
-        cart: action.payload || [], // payload varsa onu kullan, yoksa boş dizi
-      };
-      break;
-
     case ADD_TO_CART: {
       const { product, count } = action.payload;
-      const existingProductIndex = state.cart.findIndex(
-        (item) => item.product.id === product.id
-        // TODO: Eğer ürünün renk/beden gibi varyasyonları varsa,
-        // burada sadece product.id değil, varyasyon ID'lerini de kontrol etmek gerekebilir.
-        // Şimdilik sadece product.id'ye bakıyoruz.
+      const newCart = [...state.cart];
+      
+      // --- ANA DÜZELTME BURADA ---
+      // Ürünün sepette olup olmadığını `id` yerine `variantId` ile kontrol ediyoruz.
+      // Bu sayede aynı ürünün farklı bedenleri, sepette farklı ürünler olarak kabul edilir.
+      const existingProductIndex = newCart.findIndex(
+        (item) => item.product.variantId === product.variantId
       );
 
       if (existingProductIndex > -1) {
-        // Ürün sepette zaten var, sayısını artır
-        const updatedCart = state.cart.map((item, index) =>
-          index === existingProductIndex
-            ? { ...item, count: item.count + count }
-            : item
-        );
-        newState = { ...state, cart: updatedCart };
+        // Eğer aynı varyant zaten sepette varsa, sadece miktarını artır.
+        newCart[existingProductIndex].count += count;
       } else {
-        // Ürün sepette yok, yeni ürün olarak ekle
-        // checked: true varsayılan olarak eklendi, checkout'ta kullanılabilir
-        const newItem = { product, count, checked: true };
-        newState = { ...state, cart: [...state.cart, newItem] };
+        // Eğer bu varyant sepette yoksa, yeni bir ürün olarak ekle.
+        newCart.push({ product, count });
       }
-      break;
+      
+      saveCartToLocalStorage(newCart);
+      return { ...state, cart: newCart };
     }
 
     case REMOVE_FROM_CART: {
-      const { productId } = action.payload;
-      const updatedCart = state.cart.filter(
-        (item) => item.product.id !== productId
+      // --- GÜNCELLEME ---
+      // Ürünü silerken de `variantId` ile kontrol ediyoruz.
+      const filteredCart = state.cart.filter(
+        (item) => item.product.variantId !== action.payload
       );
-      newState = { ...state, cart: updatedCart };
-      break;
+      saveCartToLocalStorage(filteredCart);
+      return { ...state, cart: filteredCart };
     }
 
     case UPDATE_CART_ITEM_COUNT: {
-      const { productId, count } = action.payload;
-      let updatedCart;
-      if (count <= 0) { 
-        // Eğer yeni sayı 0 veya daha az ise, ürünü sepetten kaldır
-        updatedCart = state.cart.filter(
-          (item) => item.product.id !== productId
-        );
-      } else {
-        // Ürünün sayısını güncelle
-        updatedCart = state.cart.map((item) =>
-          item.product.id === productId ? { ...item, count: count } : item
-        );
+      const { variantId, newCount } = action.payload;
+      
+      if (newCount <= 0) {
+         // Eğer adet 0 veya daha az ise, ürünü sepetten tamamen kaldır.
+         const cartAfterRemoval = state.cart.filter(
+           (item) => item.product.variantId !== variantId
+         );
+         saveCartToLocalStorage(cartAfterRemoval);
+         return { ...state, cart: cartAfterRemoval };
       }
-      newState = { ...state, cart: updatedCart };
-      break;
+
+      // --- GÜNCELLEME ---
+      // Miktarı güncellerken de doğru varyantı bulmak için `variantId` kullanıyoruz.
+      const updatedCart = state.cart.map((item) => {
+        if (item.product.variantId === variantId) {
+          return { ...item, count: newCount };
+        }
+        return item;
+      });
+
+      saveCartToLocalStorage(updatedCart);
+      return { ...state, cart: updatedCart };
     }
 
-    case CLEAR_CART:
-      newState = {
-        ...state,
-        cart: [], // Sepeti boşalt
-      };
-      break;
-
-    case TOGGLE_PRODUCT_CHECKED: {
-      const { productId } = action.payload;
-      const updatedCart = state.cart.map((item) =>
-        item.product.id === productId ? { ...item, checked: !item.checked } : item
-      );
-      newState = { ...state, cart: updatedCart };
-      break;
+    case CLEAR_CART: {
+      saveCartToLocalStorage([]);
+      return { ...state, cart: [] };
     }
 
-    // case TOGGLE_CART_ITEM_CHECKED: {
-    //   const { productId } = action.payload;
-    //   const updatedCart = state.cart.map((item) =>
-    //     item.product.id === productId ? { ...item, checked: !item.checked } : item
-    //   );
-    //   return { ...state, cart: updatedCart };
-    // }
+    case LOAD_CART_FROM_STORAGE: {
+      return { ...state, cart: action.payload };
+    }
 
     default:
       return state;
   }
-
-  if (newState) {
-    if (action.type !== LOAD_CART_FROM_STORAGE) {
-      saveCartToLocalStorage(newState.cart);
-    }
-  }
-  
-  return newState || state; // Eğer newState tanımlanmadıysa (default case), orijinal state'i dön
 };
 
 export default shoppingCartReducer; 

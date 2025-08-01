@@ -1,119 +1,89 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { removeFromCart, updateCartItemCount, toggleProductChecked } from '../store/actions/shoppingCartActions';
-import { FaTrashAlt, FaPlus, FaMinus } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import { removeFromCart, updateCartItemCount } from '../store/actions/shoppingCartActions';
+import { FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
 
 const CartDropdown = ({ isOpen, toggleDropdown }) => {
-  const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.shoppingCart);
+  const dispatch = useDispatch();
+  const history = useHistory();
 
-  if (!isOpen) {
-    return null;
-  }
-
-  const handleRemoveItem = (productId) => {
-    dispatch(removeFromCart(productId));
+  const handleRemove = (variantId) => {
+    dispatch(removeFromCart(variantId));
   };
 
-  const handleUpdateQuantity = (productId, newQuantity) => {
-    if (newQuantity > 0) {
-      dispatch(updateCartItemCount(productId, newQuantity));
+  const handleUpdateCount = (variantId, newCount) => {
+    if (newCount > 0) {
+      dispatch(updateCartItemCount(variantId, newCount));
     } else {
-      dispatch(removeFromCart(productId));
+      dispatch(removeFromCart(variantId));
     }
   };
 
-  const calculateSubtotal = () => {
-    return cart.reduce((total, item) => total + item.product.price * item.count, 0).toFixed(2);
+  const handleViewCart = () => {
+    history.push('/cart');
+    toggleDropdown(); 
   };
+
+  const subtotal = cart.reduce((total, item) => total + item.product.price * item.count, 0);
+
+  if (!isOpen) return null;
 
   return (
     <div 
-      className="cart-dropdown-component absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-md shadow-xl z-20 border border-gray-200"
-      onClick={(e) => {
-        e.stopPropagation(); 
-      }}
+      className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+      // --- ANA DÜZELTME BURADA ---
+      // Bu div'in içindeki tıklama olaylarının dışarı "sızmasını" engelliyoruz.
+      // Bu sayede Navbar'daki "dışarıya tıklandı" algılayıcısı yanlışlıkla tetiklenmez.
+      onMouseDown={(e) => e.stopPropagation()}
     >
-      <div className="p-4 border-b border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-700">Shopping Cart</h3>
-      </div>
-
-      {cart.length === 0 ? (
-        <div className="p-4 text-center text-gray-500">
-          Your cart is empty.
-        </div>
-      ) : (
-        <>
-          <div className="max-h-80 overflow-y-auto p-2 custom-scrollbar">
-            {cart.map((item) => (
-              <div key={item.product.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center">
-                  <img 
-                    src={item.product.imageUrl || 'https://via.placeholder.com/50'} 
-                    alt={item.product.name} 
-                    className="w-12 h-12 object-cover rounded mr-3"
-                  />
-                  <div>
-                    <Link 
-                      to={`/product/${item.product.id}`}
-                      onClick={toggleDropdown}
-                      className="text-sm font-medium text-gray-800 hover:text-primary block"
-                    >
-                      {item.product.name}
-                    </Link>
-                    <span className="text-xs text-gray-500">
-                      ${item.product.price?.toFixed(2)}
-                    </span>
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-dark-text mb-4">Shopping Cart</h3>
+        {cart.length === 0 ? (
+          <p className="text-gray-500 text-center">Your cart is empty.</p>
+        ) : (
+          <>
+            <div className="max-h-64 overflow-y-auto pr-2">
+              {cart.map((item) => (
+                <div key={item.product.variantId} className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <img src={item.product.imageUrl} alt={item.product.name} className="w-12 h-12 object-cover rounded" />
+                    <div>
+                      <p className="font-semibold text-sm text-dark-text leading-tight">{item.product.name}</p>
+                      <p className="text-xs text-gray-500">${item.product.price.toFixed(2)}</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex flex-col items-end ml-2">
-                  <div className="flex items-center text-xs mb-1">
-                    <button 
-                      onClick={() => handleUpdateQuantity(item.product.id, item.count - 1)}
-                      className="p-1 text-gray-500 hover:text-primary disabled:opacity-50"
-                      disabled={item.count <= 1}
-                    >
-                      <FaMinus size={10}/>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleUpdateCount(item.product.variantId, item.count - 1)} className="p-1 text-gray-500 hover:text-black">
+                      <FaMinus size={12} />
                     </button>
-                    <span className="mx-1.5 w-5 text-center text-gray-900 font-semibold">
-                      {item.count}
-                    </span>
-                    <button 
-                      onClick={() => handleUpdateQuantity(item.product.id, item.count + 1)}
-                      className="p-1 text-gray-500 hover:text-primary disabled:opacity-50"
-                      disabled={item.product.stock !== undefined && item.count >= item.product.stock}
-                    >
-                      <FaPlus size={10}/>
+                    <span className="text-sm font-bold">{item.count}</span>
+                    <button onClick={() => handleUpdateCount(item.product.variantId, item.count + 1)} className="p-1 text-gray-500 hover:text-black">
+                      <FaPlus size={12} />
+                    </button>
+                    <button onClick={() => handleRemove(item.product.variantId)} className="ml-2 p-1 text-red-500 hover:text-red-700">
+                      <FaTrash size={14} />
                     </button>
                   </div>
-                  <button 
-                    onClick={() => handleRemoveItem(item.product.id)}
-                    className="text-red-500 hover:text-red-700 text-xs"
-                    aria-label="Remove item"
-                  >
-                    <FaTrashAlt className="inline mr-1" size={10}/> Remove
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-md font-semibold text-gray-700">Subtotal:</span>
-              <span className="text-md font-bold text-gray-900">${calculateSubtotal()}</span>
+              ))}
             </div>
-            <Link
-              to="/cart"
-              onClick={toggleDropdown}
-              className="block w-full bg-primary text-white text-center font-semibold py-2 px-4 rounded hover:bg-primary-dark transition-colors"
-            >
-              View Cart & Checkout
-            </Link>
-          </div>
-        </>
-      )}
+            <div className="border-t pt-4 mt-4">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-semibold text-dark-text">Subtotal:</span>
+                <span className="font-bold text-primary">${subtotal.toFixed(2)}</span>
+              </div>
+              <button
+                onClick={handleViewCart}
+                className="w-full bg-primary text-white font-bold py-2 px-4 rounded hover:bg-primary-dark transition"
+              >
+                View Cart & Checkout
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

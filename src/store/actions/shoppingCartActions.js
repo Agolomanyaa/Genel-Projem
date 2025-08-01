@@ -1,87 +1,44 @@
-// Action Tipleri
-export const SET_CART = 'SET_CART';
-export const SET_PAYMENT = 'SET_PAYMENT';
-export const SET_ADDRESS = 'SET_ADDRESS';
+// Action Types
 export const ADD_TO_CART = 'ADD_TO_CART';
 export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
 export const UPDATE_CART_ITEM_COUNT = 'UPDATE_CART_ITEM_COUNT';
-export const CLEAR_CART = 'CLEAR_CART'; // Tüm sepeti temizlemek için opsiyonel
-export const TOGGLE_PRODUCT_CHECKED = 'TOGGLE_PRODUCT_CHECKED'; // Bu satırın olduğundan emin olalım
-export const LOAD_CART_FROM_STORAGE = 'LOAD_CART_FROM_STORAGE'; // Bu zaten vardı
-// export const TOGGLE_CART_ITEM_CHECKED = 'TOGGLE_CART_ITEM_CHECKED'; // Şimdilik kullanmayabiliriz
+export const CLEAR_CART = 'CLEAR_CART';
+export const LOAD_CART_FROM_STORAGE = 'LOAD_CART_FROM_STORAGE';
 
-// Action Creator Fonksiyonları
-export const setCart = (cartItems) => ({
-  type: SET_CART,
-  payload: cartItems, // Gönderilecek veri (sepet ürünleri dizisi)
-});
-
-export const setPayment = (paymentInfo) => ({
-  type: SET_PAYMENT,
-  payload: paymentInfo, // Gönderilecek veri (ödeme bilgileri objesi)
-});
-
-export const setAddress = (addressInfo) => ({
-  type: SET_ADDRESS,
-  payload: addressInfo, // Gönderilecek veri (adres bilgileri objesi)
-});
-
-/**
- * Sepete ürün ekler veya mevcut ürünün sayısını artırır.
- * @param {Object} product - Eklenecek ürün objesi (id, name, price, images vb. içermeli)
- * @param {number} count - Eklenecek miktar (varsayılan 1)
- */
-export const addToCart = (product, count = 1) => ({
+// Action Creators
+export const addToCart = (product, count) => ({
   type: ADD_TO_CART,
   payload: { product, count },
 });
 
-/**
- * Sepetten bir ürünü ID'sine göre tamamen kaldırır.
- * @param {string|number} productId - Kaldırılacak ürünün ID'si
- */
-export const removeFromCart = (productId) => ({
+// --- DÜZELTME ---
+// Bu eylemin payload'u olarak artık variantId bekliyoruz.
+export const removeFromCart = (variantId) => ({
   type: REMOVE_FROM_CART,
-  payload: { productId },
+  payload: variantId, 
 });
 
-/**
- * Sepetteki bir ürünün miktarını günceller.
- * @param {string|number} productId - Miktarı güncellenecek ürünün ID'si
- * @param {number} count - Yeni miktar (0'dan büyük olmalı, 0 ise ürünü kaldırır gibi davranabilir)
- */
-export const updateCartItemCount = (productId, count) => ({
+// --- DÜZELTME ---
+// Bu eylemin payload'u olarak artık variantId ve yeni adedi bekliyoruz.
+export const updateCartItemCount = (variantId, newCount) => ({
   type: UPDATE_CART_ITEM_COUNT,
-  payload: { productId, count },
+  payload: { variantId, newCount },
 });
 
-/**
- * Tüm sepeti temizler.
- */
 export const clearCart = () => ({
   type: CLEAR_CART,
 });
 
-/**
- * Sepetteki bir ürünün "checked" durumunu (seçili/seçili değil) değiştirir.
- * @param {string|number} productId - Durumu değiştirilecek ürünün ID'si
- */
-export const toggleProductChecked = (productId) => ({ // Bu fonksiyonun export edildiğinden emin olalım
-  type: TOGGLE_PRODUCT_CHECKED,
-  payload: { productId },
-});
-
-// Opsiyonel: Ürünün işaretli olup olmadığını değiştirmek için (checkout'ta kullanılabilir)
-// export const toggleCartItemChecked = (productId) => ({
-//   type: TOGGLE_CART_ITEM_CHECKED,
-//   payload: { productId },
-// });
-
-// BU FONKSİYONUN EXPORT EDİLDİĞİNDEN EMİN OLUN
-export const loadCartFromStorage = (cart) => ({
-  type: LOAD_CART_FROM_STORAGE,
-  payload: cart,
-});
-
-// TODO: Action Creator fonksiyonları buraya eklenecek
-// TODO: Sepete ekleme/çıkarma/güncelleme gibi daha karmaşık action'lar ileride eklenebilir 
+export const loadCartFromStorage = () => {
+    try {
+        const serializedCart = localStorage.getItem('shoppingCart');
+        if (serializedCart === null) {
+            return { type: LOAD_CART_FROM_STORAGE, payload: [] };
+        }
+        const cart = JSON.parse(serializedCart);
+        return { type: LOAD_CART_FROM_STORAGE, payload: cart };
+    } catch (error) {
+        console.error("Could not load cart from local storage", error);
+        return { type: LOAD_CART_FROM_STORAGE, payload: [] };
+    }
+}; 
