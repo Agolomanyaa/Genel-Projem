@@ -112,7 +112,9 @@ const AdminPage = () => {
                                 <option value="">Kategori Seçin</option>
                                 {/* GÜNCELLEME: `categories` dizisi artık formatlanmış isimleri içeriyor */}
                                 {categories.map(cat => (
-                                    <option key={cat.id} value={cat.id}>{cat.formattedName}</option>
+                                    <option key={cat.id} value={cat.id} className="text-black"> {/* DÜZELTME BURADA */}
+                                        {cat.formattedName}
+                                    </option>
                                 ))}
                             </select>
                             {errors.categoryId && <p className="text-red-500 text-xs mt-1">{errors.categoryId.message}</p>}
