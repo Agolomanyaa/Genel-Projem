@@ -1,21 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-// Placeholder for individual category item
-const CategoryItem = ({ imageUrl, label, className = "", isMobile = false }) => {
-  let categoryPath = '/shop'; // Varsayılan
+const CategoryItem = ({ imageUrl, label, className = "", isMobile = false, categories = [] }) => {
+  let targetCategoryName = '';
+  // Gelen İngilizce etiketleri, veritabanındaki Türkçe kategori isimleriyle eşleştiriyoruz.
   if (label === 'MEN') {
-    categoryPath = '/shop/e'; // Erkek için /shop/e
+    targetCategoryName = 'Erkek';
   } else if (label === 'WOMEN') {
-    categoryPath = '/shop/k'; // Kadın için /shop/k
+    targetCategoryName = 'Kadın';
   } else if (label === 'HOME & LIVING') {
-    categoryPath = '/shop/home-living'; // Home & Living için özel yolumuz
+    targetCategoryName = 'Home & Living';
   }
+
+  // Sadece ana kategoriyi bulduğumuzdan emin oluyoruz (parent'ı olmayan).
+  const targetCategory = categories.find(cat => cat.name === targetCategoryName && !cat.parentId);
+  
+  // Eğer kategoriyi bulursak doğru linki oluştur, bulamazsak ana shop sayfasına gitsin.
+  const categoryPath = targetCategory ? `/shop?category=${targetCategory.id}` : '/shop';
 
   return (
     <Link to={categoryPath} className={`relative block overflow-hidden group ${className} ${isMobile ? 'aspect-[3/4]' : 'md:aspect-auto'} bg-gray-200`}>
       <img
-        src={imageUrl || `https://via.placeholder.com/500x${isMobile ? 660 : 640}/${isMobile ? 'e0e0e0' : 'f0f0f0'}/a0a0a0?text=${label.toUpperCase()}+Placeholder`}
+        src={imageUrl}
         alt={`${label} category item`}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
         loading="lazy"
@@ -30,9 +37,10 @@ const CategoryItem = ({ imageUrl, label, className = "", isMobile = false }) => 
 };
 
 const EditorPicks = () => {
-  // URL'ler
+  const { categories } = useSelector(state => state.product);
+
   const menImageUrl = "https://images.unsplash.com/photo-1611233361198-dc49830c2ef7?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-  const womenImageUrl = "https://images.unsplash.com/photo-1735851755365-6057d459facb?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+  const womenImageUrl = "https://images.unsplash.com/photo-1572804013427-4d7ca7268217?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   const homeLivingImageUrl = "https://images.unsplash.com/photo-1556020685-ae41abfc9365?q=80&w=3134&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
   return (
@@ -40,29 +48,22 @@ const EditorPicks = () => {
       <h2 className="text-2xl font-bold mb-2 text-dark-text">EDITOR'S PICK</h2>
       <p className="text-second-text mb-8 md:mb-10 text-sm">Create Your Own Style</p>
 
-      {/* Desktop Grid (md ve üzeri) */}
       <div className="hidden md:grid grid-cols-3 gap-6 h-[32rem]">
-        {/* Column 1: MEN */}
         <div className="col-span-1 h-full">
-          <CategoryItem label="MEN" imageUrl={menImageUrl} className="h-full" />
+          <CategoryItem label="MEN" imageUrl={menImageUrl} className="h-full" categories={categories} />
         </div>
-        {/* Column 2: WOMEN */}
         <div className="col-span-1 h-full">
-          <CategoryItem label="WOMEN" imageUrl={womenImageUrl} className="h-full" />
+          <CategoryItem label="WOMEN" imageUrl={womenImageUrl} className="h-full" categories={categories} />
         </div>
-        {/* Column 3: HOME & LIVING */}
         <div className="col-span-1 h-full">
-          <CategoryItem label="HOME & LIVING" imageUrl={homeLivingImageUrl} className="h-full" />
+          <CategoryItem label="HOME & LIVING" imageUrl={homeLivingImageUrl} className="h-full" categories={categories} />
         </div>
       </div>
 
-      {/* Mobile Grid/Stack (md'den küçük) */}
       <div className="grid grid-cols-1 gap-6 md:hidden">
-        {/* Figma mobil CSS'inde bu bölüm farklı görünebilir, taslağa göre uyarlayın */}
-        {/* Örnek olarak tümünü alt alta listeliyorum */}
-        <CategoryItem label="MEN" imageUrl={menImageUrl} isMobile={true} />
-        <CategoryItem label="WOMEN" imageUrl={womenImageUrl} isMobile={true} />
-        <CategoryItem label="HOME & LIVING" imageUrl={homeLivingImageUrl} isMobile={true} />
+        <CategoryItem label="MEN" imageUrl={menImageUrl} isMobile={true} categories={categories} />
+        <CategoryItem label="WOMEN" imageUrl={womenImageUrl} isMobile={true} categories={categories} />
+        <CategoryItem label="HOME & LIVING" imageUrl={homeLivingImageUrl} isMobile={true} categories={categories} />
       </div>
     </section>
   );
